@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings } from 'lucide-react';
+import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -22,7 +22,8 @@ const AppHeader = () => {
   const location = useLocation();
 
   const navigationItems = [
-    { name: 'Home', path: '/', icon: Home },
+    { name: 'Discover', path: '/', icon: Home },
+    { name: 'Stats', path: '/stats', icon: BarChart3 },
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
