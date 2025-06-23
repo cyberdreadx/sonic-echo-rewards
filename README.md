@@ -1,8 +1,24 @@
-# Welcome to your Lovable project
+
+# Disconium - AI Music Discovery & Recognition
+
+Discover and identify music with AI-powered recognition. Earn $DISCO tokens for every song you discover.
 
 ## Project info
 
+**Author**: cyberdreadx  
 **URL**: https://lovable.dev/projects/7007fb2c-e27f-45b0-96b7-f97f7dd8277a
+
+## About Disconium
+
+Disconium is a modern music recognition app that combines AI-powered audio identification with blockchain rewards. Similar to Shazam but with token incentives, users can discover new music and earn $DISCO tokens for their discoveries.
+
+### Features
+
+- 🎵 AI-powered music recognition
+- 🪙 Earn $DISCO tokens for discoveries
+- 📊 Track your music discovery stats
+- 🎯 Minimal, focused interface
+- 📱 Mobile-first responsive design
 
 ## How can I edit this code?
 
@@ -54,15 +70,17 @@ npm run dev
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **State Management**: TanStack React Query
+- **Routing**: React Router
+- **Icons**: Lucide React
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/7007fb2c-e27f-45b0-96b7-f97f7dd8277a) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/7007fb2c-e27f-45b0-96b7-f97f7dd8277a) and click on Share → Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 
@@ -71,3 +89,11 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Contributing
+
+This project is developed by cyberdreadx. For contributions or questions, please reach out through the appropriate channels.
+
+## License
+
+This project is proprietary software developed by cyberdreadx.
