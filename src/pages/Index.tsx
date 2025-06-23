@@ -10,13 +10,13 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <AppHeader />
       
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <main className="container mx-auto px-4 py-6 space-y-6 max-w-md md:max-w-none">
         {/* User Stats */}
         <UserStats />
         
         {/* Main Recognition Interface */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+        <div className="space-y-6 md:grid md:grid-cols-3 md:gap-8 md:space-y-0">
+          <div className="md:col-span-2">
             <MusicRecognition />
           </div>
           

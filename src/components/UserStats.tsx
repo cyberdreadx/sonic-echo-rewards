@@ -28,19 +28,19 @@ const UserStats = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white border border-gray-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-gray-600 font-medium flex items-center gap-2">
-              <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
-                <stat.icon className="w-4 h-4 text-black" />
+          <CardHeader className="pb-2 md:pb-3">
+            <CardTitle className="text-xs md:text-sm text-gray-600 font-medium flex flex-col items-center gap-2 md:flex-row">
+              <div className="w-6 h-6 md:w-8 md:h-8 rounded bg-gray-100 flex items-center justify-center">
+                <stat.icon className="w-3 h-3 md:w-4 md:h-4 text-black" />
               </div>
-              {stat.title}
+              <span className="text-center md:text-left">{stat.title}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-black">{stat.value}</div>
+            <div className="text-lg md:text-2xl font-bold text-black text-center md:text-left">{stat.value}</div>
           </CardContent>
         </Card>
       ))}

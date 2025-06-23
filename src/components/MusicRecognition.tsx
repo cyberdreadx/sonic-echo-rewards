@@ -10,13 +10,11 @@ const MusicRecognition = () => {
 
   const handleStartListening = () => {
     setIsListening(true);
-    // Simulate listening and processing
     setTimeout(() => {
       setIsListening(false);
       setIsProcessing(true);
       setTimeout(() => {
         setIsProcessing(false);
-        // Would show results here
       }, 2000);
     }, 3000);
   };
@@ -27,9 +25,9 @@ const MusicRecognition = () => {
 
   return (
     <Card className="bg-white border border-gray-200">
-      <CardContent className="p-8 text-center">
-        <div className="mb-8">
-          <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-6 transition-all duration-300 border-2 ${
+      <CardContent className="p-6 md:p-8 text-center">
+        <div className="mb-6 md:mb-8">
+          <div className={`w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full flex items-center justify-center mb-4 md:mb-6 transition-all duration-300 border-2 active:scale-95 ${
             isListening 
               ? 'bg-black border-black' 
               : isProcessing
@@ -37,19 +35,19 @@ const MusicRecognition = () => {
               : 'bg-gray-100 border-gray-200 hover:bg-gray-200'
           }`}>
             {isProcessing ? (
-              <Loader2 className="w-16 h-16 text-white animate-spin" />
+              <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-white animate-spin" />
             ) : isListening ? (
-              <Mic className="w-16 h-16 text-white" />
+              <Mic className="w-12 h-12 md:w-16 md:h-16 text-white" />
             ) : (
-              <Music className="w-16 h-16 text-black" />
+              <Music className="w-12 h-12 md:w-16 md:h-16 text-black" />
             )}
           </div>
           
-          <h2 className="text-3xl font-bold text-black mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-black mb-3 md:mb-4">
             {isProcessing ? 'Identifying Track...' : isListening ? 'Listening...' : 'Ready to Discover'}
           </h2>
           
-          <p className="text-gray-600 text-lg mb-8">
+          <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 px-4 md:px-0">
             {isProcessing 
               ? 'Processing audio fingerprint...' 
               : isListening 
@@ -64,9 +62,9 @@ const MusicRecognition = () => {
             <Button 
               onClick={handleStartListening}
               size="lg" 
-              className="bg-black hover:bg-gray-800 text-white px-12 py-6 text-xl font-medium rounded"
+              className="bg-black hover:bg-gray-800 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-medium rounded-xl w-full md:w-auto active:scale-95 transition-transform"
             >
-              <Mic className="w-6 h-6 mr-3" />
+              <Mic className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
               Start Listening
             </Button>
           ) : isListening ? (
@@ -74,9 +72,9 @@ const MusicRecognition = () => {
               onClick={handleStopListening}
               size="lg" 
               variant="outline"
-              className="border-black text-black hover:bg-gray-100 px-12 py-6 text-xl font-medium rounded"
+              className="border-black text-black hover:bg-gray-100 px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-medium rounded-xl w-full md:w-auto active:scale-95 transition-transform"
             >
-              <Square className="w-6 h-6 mr-3" />
+              <Square className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
               Stop Listening
             </Button>
           ) : null}
