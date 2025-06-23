@@ -7,7 +7,7 @@ import RecentDiscoveries from '@/components/RecentDiscoveries';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-950">
+    <div className="min-h-screen bg-white">
       <AppHeader />
       
       <main className="container mx-auto px-6 py-8 space-y-8">

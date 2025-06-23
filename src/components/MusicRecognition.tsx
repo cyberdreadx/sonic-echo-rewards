@@ -26,30 +26,30 @@ const MusicRecognition = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/90 to-purple-900/50 backdrop-blur-xl border border-gray-700/50">
+    <Card className="bg-white border border-gray-200">
       <CardContent className="p-8 text-center">
         <div className="mb-8">
-          <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-6 transition-all duration-300 ${
+          <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-6 transition-all duration-300 border-2 ${
             isListening 
-              ? 'bg-gradient-to-r from-red-500 to-pink-500 animate-pulse' 
+              ? 'bg-black border-black' 
               : isProcessing
-              ? 'bg-gradient-to-r from-blue-500 to-purple-500'
-              : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+              ? 'bg-gray-800 border-gray-800'
+              : 'bg-gray-100 border-gray-200 hover:bg-gray-200'
           }`}>
             {isProcessing ? (
               <Loader2 className="w-16 h-16 text-white animate-spin" />
             ) : isListening ? (
               <Mic className="w-16 h-16 text-white" />
             ) : (
-              <Music className="w-16 h-16 text-white" />
+              <Music className="w-16 h-16 text-black" />
             )}
           </div>
           
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-black mb-4">
             {isProcessing ? 'Identifying Track...' : isListening ? 'Listening...' : 'Ready to Discover'}
           </h2>
           
-          <p className="text-gray-300 text-lg mb-8">
+          <p className="text-gray-600 text-lg mb-8">
             {isProcessing 
               ? 'Processing audio fingerprint...' 
               : isListening 
@@ -64,7 +64,7 @@ const MusicRecognition = () => {
             <Button 
               onClick={handleStartListening}
               size="lg" 
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 py-6 text-xl font-bold rounded-full transition-all duration-300 transform hover:scale-105"
+              className="bg-black hover:bg-gray-800 text-white px-12 py-6 text-xl font-medium rounded"
             >
               <Mic className="w-6 h-6 mr-3" />
               Start Listening
@@ -73,15 +73,15 @@ const MusicRecognition = () => {
             <Button 
               onClick={handleStopListening}
               size="lg" 
-              variant="destructive"
-              className="px-12 py-6 text-xl font-bold rounded-full"
+              variant="outline"
+              className="border-black text-black hover:bg-gray-100 px-12 py-6 text-xl font-medium rounded"
             >
               <Square className="w-6 h-6 mr-3" />
               Stop Listening
             </Button>
           ) : null}
           
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-500">
             Earn 0.5-2.0 $DISCO per successful identification
           </div>
         </div>

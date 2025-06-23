@@ -40,34 +40,34 @@ const RecentDiscoveries = () => {
   ];
 
   return (
-    <Card className="bg-gray-900/80 backdrop-blur-xl border border-gray-700/50">
+    <Card className="bg-white border border-gray-200">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Music className="w-5 h-5 text-purple-400" />
+        <CardTitle className="text-black flex items-center gap-2">
+          <Music className="w-5 h-5 text-black" />
           Recent Discoveries
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {discoveries.map((discovery, index) => (
-          <div key={index} className={`p-4 rounded-xl border transition-all hover:bg-gray-800/50 ${
+          <div key={index} className={`p-4 rounded border transition-all hover:bg-gray-50 ${
             discovery.isNew 
-              ? 'bg-gradient-to-r from-green-500/10 to-green-500/5 border-green-500/30' 
-              : 'bg-gray-800/30 border-gray-700/50'
+              ? 'bg-gray-50 border-black' 
+              : 'bg-white border-gray-200'
           }`}>
             <div className="flex items-start justify-between mb-3">
               <div>
-                <h4 className="font-semibold text-white flex items-center gap-2">
+                <h4 className="font-medium text-black flex items-center gap-2">
                   {discovery.track}
                   {discovery.isNew && (
-                    <span className="px-2 py-1 bg-green-500 text-black text-xs font-bold rounded-full">
+                    <span className="px-2 py-1 bg-black text-white text-xs font-medium rounded">
                       NEW
                     </span>
                   )}
                 </h4>
-                <p className="text-gray-400 text-sm">by {discovery.artist}</p>
+                <p className="text-gray-600 text-sm">by {discovery.artist}</p>
               </div>
               <div className="text-right">
-                <div className="text-yellow-400 font-bold flex items-center gap-1">
+                <div className="text-black font-medium flex items-center gap-1">
                   <Coins className="w-4 h-4" />
                   {discovery.earnings}
                 </div>
