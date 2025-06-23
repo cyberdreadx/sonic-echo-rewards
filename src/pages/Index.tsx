@@ -7,15 +7,15 @@ import RecentDiscoveries from '@/components/RecentDiscoveries';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <AppHeader />
       
-      <main className="container mx-auto px-4 py-6 space-y-6 max-w-md md:max-w-none">
+      <main className="w-full px-4 py-6 space-y-6 max-w-md mx-auto md:max-w-7xl md:px-6">
         {/* User Stats */}
         <UserStats />
         
         {/* Main Recognition Interface */}
-        <div className="space-y-6 md:grid md:grid-cols-3 md:gap-8 md:space-y-0">
+        <div className="space-y-6 md:grid md:grid-cols-3 md:gap-6 md:space-y-0">
           <div className="md:col-span-2">
             <MusicRecognition />
           </div>
