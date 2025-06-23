@@ -1,86 +1,129 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Music, Coins, ArrowUp } from 'lucide-react';
+import { Music, Coins, ArrowRight, Clock, Users, DollarSign } from 'lucide-react';
 
 const CTASection = () => {
   return (
-    <section className="py-20 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-r from-purple-950 via-black to-pink-950 relative overflow-hidden">
       {/* Background animations */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-yellow-400 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-purple-400 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-blue-400 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-80 h-80 bg-yellow-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-purple-400 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
       <div className="container mx-auto px-6 text-center relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <Music className="w-12 h-12 text-yellow-400" />
-            <h2 className="text-4xl md:text-6xl font-bold text-white">
-              Join the <span className="text-transparent bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text">$DISCO</span> Revolution
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12">
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
+              Don't Miss The 
+              <br />
+              <span className="text-transparent bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text">Music Revolution</span>
             </h2>
-            <Coins className="w-12 h-12 text-yellow-400" />
+            <p className="text-2xl text-gray-200 leading-relaxed">
+              Early adopters are already earning hundreds in $DISCO tokens.
+              <br />
+              The question isn't if you'll join, but when.
+            </p>
           </div>
-          
-          <p className="text-xl md:text-2xl text-gray-200 mb-10 leading-relaxed">
-            Be part of the future where music discovery creates value for everyone. 
-            <br className="hidden md:block" />
-            Artists, listeners, and the entire music ecosystem benefits.
-          </p>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-4">For Artists</h3>
-              <ul className="text-gray-200 space-y-2 text-left">
-                <li>• Mint exclusive tracks as NFTs</li>
-                <li>• Earn $DISCO from every recognition</li>
-                <li>• Track real-world engagement</li>
-                <li>• Build verified music catalog</li>
+          {/* Stats */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-gradient-to-br from-green-900/50 to-green-800/50 backdrop-blur-sm rounded-3xl p-8 border border-green-500/30">
+              <DollarSign className="w-16 h-16 text-green-400 mx-auto mb-4" />
+              <div className="text-4xl font-black text-white mb-2">$50,000+</div>
+              <div className="text-gray-300">Already paid to early users</div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 backdrop-blur-sm rounded-3xl p-8 border border-blue-500/30">
+              <Users className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+              <div className="text-4xl font-black text-white mb-2">2,500+</div>
+              <div className="text-gray-300">Active music discoverers</div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 backdrop-blur-sm rounded-3xl p-8 border border-purple-500/30">
+              <Music className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <div className="text-4xl font-black text-white mb-2">500+</div>
+              <div className="text-gray-300">Exclusive NFT tracks minted</div>
+            </div>
+          </div>
+
+          {/* Two-sided value prop */}
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="bg-gradient-to-br from-purple-900/70 to-purple-800/70 backdrop-blur-sm rounded-3xl p-10 border border-purple-500/40 text-left">
+              <Music className="w-16 h-16 text-purple-400 mb-6" />
+              <h3 className="text-3xl font-bold text-white mb-6">For Artists</h3>
+              <ul className="text-gray-200 space-y-4 text-lg mb-8">
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  Mint unreleased tracks as exclusive NFTs
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  Earn $DISCO every time someone discovers your music
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  Track real-world engagement with GPS data
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  Build a verified catalog of original music
+                </li>
               </ul>
-              <Button className="w-full mt-6 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white py-3 rounded-xl transition-all duration-300 transform hover:scale-105">
-                Start Creating
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 text-lg font-bold rounded-2xl transition-all duration-300 transform hover:scale-105">
+                Start Minting Tracks
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-4">For Music Lovers</h3>
-              <ul className="text-gray-200 space-y-2 text-left">
-                <li>• Discover new exclusive tracks</li>
-                <li>• Earn rewards for recognition</li>
-                <li>• Support your favorite artists</li>
-                <li>• Build music discovery reputation</li>
+            <div className="bg-gradient-to-br from-blue-900/70 to-blue-800/70 backdrop-blur-sm rounded-3xl p-10 border border-blue-500/40 text-left">
+              <Coins className="w-16 h-16 text-yellow-400 mb-6" />
+              <h3 className="text-3xl font-bold text-white mb-6">For Music Lovers</h3>
+              <ul className="text-gray-200 space-y-4 text-lg mb-8">
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  Discover exclusive tracks before anyone else
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  Earn $DISCO tokens for every track you identify
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  Support artists directly with every recognition
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  Build your reputation as a music discoverer
+                </li>
               </ul>
-              <Button variant="outline" className="w-full mt-6 border-2 border-white/30 text-white hover:bg-white/10 py-3 rounded-xl transition-all duration-300">
-                Start Exploring
+              <Button variant="outline" className="w-full border-2 border-yellow-400/60 text-yellow-400 hover:bg-yellow-400/10 py-4 text-lg font-bold rounded-2xl transition-all duration-300 backdrop-blur-sm">
+                Start Discovering
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-8 border border-yellow-500/30 mb-10">
-            <h3 className="text-2xl font-bold text-white mb-4">Early Access Benefits</h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div className="text-yellow-400">
-                <ArrowUp className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-semibold">Higher Rewards</div>
-                <div className="text-gray-300">Early adopters earn more $DISCO</div>
-              </div>
-              <div className="text-yellow-400">
-                <Music className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-semibold">Exclusive Content</div>
-                <div className="text-gray-300">Access to limited NFT drops</div>
-              </div>
-              <div className="text-yellow-400">
-                <Coins className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-semibold">Founder Status</div>
-                <div className="text-gray-300">Special recognition & benefits</div>
-              </div>
+          {/* Urgency */}
+          <div className="bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-3xl p-10 border border-red-500/40 mb-12">
+            <Clock className="w-16 h-16 text-red-400 mx-auto mb-6" />
+            <h3 className="text-3xl font-bold text-white mb-4">Limited Time: Early Adopter Rewards</h3>
+            <p className="text-xl text-gray-200 mb-6">
+              First 10,000 users get 5x reward multiplier for their first month
+            </p>
+            <div className="text-red-400 text-lg font-semibold">
+              Only 2,847 spots remaining
             </div>
           </div>
 
-          <Button size="lg" className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold px-12 py-4 text-xl rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl">
-            Launch App (Coming Soon)
+          <Button size="lg" className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-black px-16 py-6 text-2xl rounded-3xl transition-all duration-300 transform hover:scale-105 shadow-2xl">
+            Join The Revolution Now
+            <ArrowRight className="w-6 h-6 ml-3" />
           </Button>
+          
+          <p className="text-gray-400 mt-6 text-lg">
+            No credit card required • Start earning in 60 seconds
+          </p>
         </div>
       </div>
     </section>
