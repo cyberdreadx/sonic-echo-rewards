@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins } from 'lucide-react';
+import { Coins, Upload } from 'lucide-react';
 
 const TokenomicsSection = () => {
   const allocations = [
