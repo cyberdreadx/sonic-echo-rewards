@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Music, Coins, Clock, Users, Target } from 'lucide-react';
+import { TrendingUp, Music, Coins, Clock, Users } from 'lucide-react';
 
 const ProfileStats = () => {
   const stats = [
@@ -17,13 +17,6 @@ const ProfileStats = () => {
       value: "1,829",
       change: "+12 this week",
       icon: Music,
-      trend: "up"
-    },
-    {
-      title: "Discovery Rate",
-      value: "94.2%",
-      change: "+2.1% vs last month",
-      icon: Target,
       trend: "up"
     },
     {
