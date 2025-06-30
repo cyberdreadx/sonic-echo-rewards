@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +30,7 @@ const MusicRecognition = () => {
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
   const { toast } = useToast();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isListening = isRecording;
 
@@ -40,11 +40,15 @@ const MusicRecognition = () => {
       setResult(null);
       await startRecording();
       
+      // Clear any existing timer
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      
       // Auto-stop after 10 seconds
-      setTimeout(() => {
-        if (isRecording) {
-          stopRecording();
-        }
+      timerRef.current = setTimeout(() => {
+        console.log('Auto-stopping recording after 10 seconds');
+        stopRecording();
       }, 10000);
     } catch (error) {
       toast({
@@ -56,8 +60,22 @@ const MusicRecognition = () => {
   };
 
   const handleStopListening = () => {
+    // Clear the auto-stop timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     stopRecording();
   };
+
+  // Clean up timer on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const processAudio = async () => {
     if (!audioBlob) return;

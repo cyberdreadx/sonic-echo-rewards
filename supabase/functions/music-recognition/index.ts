@@ -64,7 +64,7 @@ async function generateSignature(timestamp: number, accessSecret: string): Promi
 }
 
 async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
-  // Get credentials from environment variables
+  // Get credentials from environment variables with explicit error handling
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
   const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
   const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
@@ -78,8 +78,18 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   });
 
   if (!accessKey || !accessSecret) {
-    console.error('Missing credentials:', { accessKey: !!accessKey, accessSecret: !!accessSecret });
+    console.error('Missing credentials:', { 
+      accessKey: !!accessKey, 
+      accessSecret: !!accessSecret,
+      allEnvKeys: Object.keys(Deno.env.toObject())
+    });
     throw new Error('ACRCloud credentials not configured');
+  }
+
+  // Validate that the access key looks correct (should be 32 characters)
+  if (accessKey.length !== 32) {
+    console.error('Access key appears invalid:', { length: accessKey.length });
+    throw new Error('ACRCloud access key format appears invalid');
   }
 
   console.log('Audio blob details:', {
@@ -115,7 +125,7 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     signature: signature.substring(0, 10) + '...',
     audioSize: audioBuffer.byteLength,
     formDataEntries: Array.from(formData.keys()),
-    accessKey: accessKey.substring(0, 10) + '...'
+    accessKey: accessKey.substring(0, 8) + '...' + accessKey.substring(accessKey.length - 4)
   });
 
   const response = await fetch(`https://${host}/v1/identify`, {
@@ -187,7 +197,8 @@ serve(async (req) => {
           hasAccessKey: !!accessKey,
           hasAccessSecret: !!accessSecret,
           accessKeyLength: accessKey?.length || 0,
-          accessSecretLength: accessSecret?.length || 0
+          accessSecretLength: accessSecret?.length || 0,
+          allEnvKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('ACRCLOUD'))
         });
         
         if (!accessKey || !accessSecret) {
