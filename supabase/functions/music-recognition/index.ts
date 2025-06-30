@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,7 +63,7 @@ async function generateSignature(timestamp: number, accessSecret: string): Promi
   return base64Signature;
 }
 
-async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
+async function recognizeAudio(audioFile: File): Promise<ACRCloudResponse> {
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
   const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
   const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
@@ -73,17 +72,30 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     throw new Error('ACRCloud credentials not configured');
   }
 
+  console.log('Audio file details:', {
+    name: audioFile.name,
+    size: audioFile.size,
+    type: audioFile.type
+  });
+
   const timestamp = Math.floor(Date.now() / 1000);
   const signature = await generateSignature(timestamp, accessSecret);
   
   const formData = new FormData();
-  formData.append('sample', audioBlob, 'audio.webm');
+  formData.append('sample', audioFile);
   formData.append('access_key', accessKey);
   formData.append('data_type', 'audio');
   formData.append('signature_version', '1');
   formData.append('signature', signature);
   formData.append('timestamp', timestamp.toString());
   
+  console.log('Sending request to ACRCloud:', {
+    host,
+    timestamp,
+    signature: signature.substring(0, 10) + '...',
+    audioSize: audioFile.size
+  });
+
   const response = await fetch(`https://${host}/v1/identify`, {
     method: 'POST',
     body: formData,
@@ -93,7 +105,9 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     throw new Error(`ACRCloud API error: ${response.status} ${response.statusText}`);
   }
 
-  return await response.json();
+  const result = await response.json();
+  console.log('ACRCloud raw response:', result);
+  return result;
 }
 
 function formatMusicInfo(response: ACRCloudResponse) {
@@ -136,12 +150,12 @@ serve(async (req) => {
     }
 
     const contentType = req.headers.get('content-type') || '';
+    console.log('Request content type:', contentType);
     
     // Handle test requests for credential checking
     if (contentType.includes('application/json')) {
       const body = await req.json();
       if (body.test) {
-        // This is a test request to check credentials
         const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
         const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
         
@@ -164,34 +178,47 @@ serve(async (req) => {
       }
     }
 
-    // Handle form data (audio recognition)
-    const formData = await req.formData();
-    const audioBlob = formData.get('audio') as File;
+    // Handle FormData (audio recognition)
+    if (contentType.includes('multipart/form-data') || !contentType.includes('application/json')) {
+      console.log('Processing FormData request');
+      const formData = await req.formData();
+      const audioFile = formData.get('audio') as File;
 
-    if (!audioBlob) {
-      return new Response('No audio file provided', { status: 400, headers: corsHeaders });
-    }
-
-    console.log('Processing audio recognition request');
-    const response = await recognizeAudio(audioBlob);
-    console.log('ACRCloud response:', response);
-
-    if (response.status.code === 0) {
-      const musicInfo = formatMusicInfo(response);
-      if (musicInfo) {
-        return new Response(JSON.stringify({ success: true, data: musicInfo }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      if (!audioFile) {
+        console.log('No audio file found in FormData');
+        return new Response(JSON.stringify({ success: false, error: 'No audio file provided' }), { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         });
+      }
+
+      console.log('Processing audio recognition request');
+      const response = await recognizeAudio(audioFile);
+
+      if (response.status.code === 0) {
+        const musicInfo = formatMusicInfo(response);
+        if (musicInfo) {
+          return new Response(JSON.stringify({ success: true, data: musicInfo }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          return new Response(JSON.stringify({ success: false, error: 'No match found' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
       } else {
-        return new Response(JSON.stringify({ success: false, error: 'No match found' }), {
+        console.log('ACRCloud error:', response.status);
+        return new Response(JSON.stringify({ success: false, error: response.status.msg }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-    } else {
-      return new Response(JSON.stringify({ success: false, error: response.status.msg }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
+
+    return new Response(JSON.stringify({ success: false, error: 'Invalid request format' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
     console.error('Music recognition error:', error);
     return new Response(JSON.stringify({ success: false, error: error.message }), {

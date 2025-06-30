@@ -64,17 +64,23 @@ const MusicRecognition = () => {
 
     setIsProcessing(true);
     try {
-      console.log('Processing audio with secure backend...');
+      console.log('Processing audio with secure backend...', {
+        audioSize: audioBlob.size,
+        audioType: audioBlob.type
+      });
+      
+      // Create FormData properly
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      
+      console.log('FormData created, invoking function...');
       
       const { data, error } = await supabase.functions.invoke('music-recognition', {
-        body: (() => {
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'audio.webm');
-          return formData;
-        })(),
+        body: formData,
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         throw error;
       }
 
