@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mic, Square, Loader2, Music, ExternalLink, Spotify, Youtube } from 'lucide-react';
+import { Mic, Square, Loader2, Music, ExternalLink, Youtube } from 'lucide-react';
 import { useAudioRecording } from '@/hooks/useAudioRecording';
 import { ACRCloudService } from '@/services/acrcloudService';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,9 @@ const MusicRecognition = () => {
   const [credentials, setCredentials] = useState<ACRCloudCredentials | null>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
   const { toast } = useToast();
+
+  // Define isListening based on isRecording state
+  const isListening = isRecording;
 
   const handleStartListening = async () => {
     if (!credentials) {
@@ -222,7 +225,7 @@ const MusicRecognition = () => {
                       onClick={() => openLink(result.links.spotify)}
                       className="flex items-center gap-2"
                     >
-                      <Spotify className="w-4 h-4" />
+                      <Music className="w-4 h-4" />
                       Spotify
                       <ExternalLink className="w-3 h-3" />
                     </Button>
