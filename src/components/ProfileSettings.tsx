@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Settings, Wallet, Bell, Share2, LogOut, Shield } from 'lucide-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 const ProfileSettings = () => {
-  const walletAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
-  const shortAddress = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+  const { connected } = useWallet();
+  const { shortAddress, disconnect } = useWalletConnection();
 
   return (
     <div className="space-y-6">
@@ -20,21 +23,45 @@ const ProfileSettings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-1">Connected Address</p>
-            <p className="font-mono text-sm text-black">{shortAddress}</p>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Status</span>
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
-              Connected
-            </Badge>
-          </div>
-          
-          <Button variant="outline" className="w-full" size="sm">
-            Disconnect Wallet
-          </Button>
+          {connected ? (
+            <>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600 mb-1">Connected Address</p>
+                <p className="font-mono text-sm text-black">{shortAddress}</p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Status</span>
+                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                  Connected
+                </Badge>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                size="sm"
+                onClick={disconnect}
+              >
+                Disconnect Wallet
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded-lg text-center">
+                <p className="text-sm text-gray-600">No wallet connected</p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Status</span>
+                <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                  Disconnected
+                </Badge>
+              </div>
+              
+              <WalletMultiButton className="!w-full !bg-black !text-white hover:!bg-gray-800 !rounded-md !h-9 !text-sm" />
+            </div>
+          )}
         </CardContent>
       </Card>
 
