@@ -64,11 +64,21 @@ async function generateSignature(timestamp: number, accessSecret: string): Promi
 }
 
 async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
+  // Get credentials from environment variables
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
   const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
   const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
 
+  console.log('Environment check:', {
+    hasAccessKey: !!accessKey,
+    hasAccessSecret: !!accessSecret,
+    host: host,
+    accessKeyLength: accessKey?.length || 0,
+    accessSecretLength: accessSecret?.length || 0
+  });
+
   if (!accessKey || !accessSecret) {
+    console.error('Missing credentials:', { accessKey: !!accessKey, accessSecret: !!accessSecret });
     throw new Error('ACRCloud credentials not configured');
   }
 
@@ -104,7 +114,8 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     timestamp,
     signature: signature.substring(0, 10) + '...',
     audioSize: audioBuffer.byteLength,
-    formDataEntries: Array.from(formData.keys())
+    formDataEntries: Array.from(formData.keys()),
+    accessKey: accessKey.substring(0, 10) + '...'
   });
 
   const response = await fetch(`https://${host}/v1/identify`, {
@@ -171,6 +182,13 @@ serve(async (req) => {
       if (body.test) {
         const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
         const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
+        
+        console.log('Credential test - Environment check:', {
+          hasAccessKey: !!accessKey,
+          hasAccessSecret: !!accessSecret,
+          accessKeyLength: accessKey?.length || 0,
+          accessSecretLength: accessSecret?.length || 0
+        });
         
         if (!accessKey || !accessSecret) {
           return new Response(JSON.stringify({ 
