@@ -47,17 +47,44 @@ export class ACRCloudService {
     this.config = config;
   }
 
-  async recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
-    const formData = new FormData();
-    formData.append('sample', audioBlob);
-    formData.append('access_key', this.config.accessKey);
-    
-    // Generate timestamp and signature
-    const timestamp = Math.floor(Date.now() / 1000);
+  private async generateSignature(timestamp: number): Promise<string> {
     const stringToSign = `POST\n/v1/identify\n${this.config.accessKey}\naudio\n1\n${timestamp}`;
     
-    // Note: In a real implementation, you'd need to generate HMAC-SHA1 signature
-    // For now, we'll make a direct API call (this requires CORS to be enabled on ACRCloud side)
+    // Convert secret to bytes
+    const encoder = new TextEncoder();
+    const keyBytes = encoder.encode(this.config.accessSecret);
+    const dataBytes = encoder.encode(stringToSign);
+    
+    // Import key for HMAC
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'HMAC', hash: 'SHA-1' },
+      false,
+      ['sign']
+    );
+    
+    // Generate signature
+    const signature = await crypto.subtle.sign('HMAC', key, dataBytes);
+    
+    // Convert to base64
+    const signatureArray = new Uint8Array(signature);
+    const base64Signature = btoa(String.fromCharCode(...signatureArray));
+    
+    return base64Signature;
+  }
+
+  async recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const signature = await this.generateSignature(timestamp);
+    
+    const formData = new FormData();
+    formData.append('sample', audioBlob, 'audio.webm');
+    formData.append('access_key', this.config.accessKey);
+    formData.append('data_type', 'audio');
+    formData.append('signature_version', '1');
+    formData.append('signature', signature);
+    formData.append('timestamp', timestamp.toString());
     
     try {
       const response = await fetch(`https://${this.config.host}/v1/identify`, {
@@ -66,10 +93,12 @@ export class ACRCloudService {
       });
 
       if (!response.ok) {
-        throw new Error(`ACRCloud API error: ${response.status}`);
+        throw new Error(`ACRCloud API error: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('ACRCloud API response:', result);
+      return result;
     } catch (error) {
       console.error('ACRCloud recognition failed:', error);
       throw error;
