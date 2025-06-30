@@ -32,9 +32,6 @@ const MusicRecognition = () => {
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
   const { toast } = useToast();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const recordingTimeRef = useRef<number>(0);
-
-  const isListening = isRecording;
 
   const handleStartListening = async () => {
     try {
@@ -47,19 +44,12 @@ const MusicRecognition = () => {
         clearTimeout(timerRef.current);
       }
       
-      // Reset recording time and start countdown
-      recordingTimeRef.current = Date.now();
       console.log('Starting auto-stop timer for 10 seconds');
       
-      // Auto-stop after 10 seconds with more reliable timer
+      // Auto-stop after 10 seconds
       timerRef.current = setTimeout(() => {
         console.log('Auto-stopping recording after 10 seconds - timer triggered');
-        if (isRecording) {
-          console.log('Recording is still active, stopping now');
-          stopRecording();
-        } else {
-          console.log('Recording already stopped');
-        }
+        stopRecording();
       }, 10000);
     } catch (error) {
       console.error('Start recording error:', error);
@@ -82,7 +72,7 @@ const MusicRecognition = () => {
     stopRecording();
   };
 
-  // Clean up timer on unmount and when recording state changes
+  // Clean up timer when recording stops
   useEffect(() => {
     if (!isRecording && timerRef.current) {
       console.log('Recording stopped, clearing timer');
@@ -91,6 +81,7 @@ const MusicRecognition = () => {
     }
   }, [isRecording]);
 
+  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -151,7 +142,7 @@ const MusicRecognition = () => {
     }
   };
 
-  // Process audio when recording stops
+  // Process audio when recording stops and audio is available
   useEffect(() => {
     if (audioBlob && !isRecording && !isProcessing) {
       console.log('Audio blob available, processing...');
@@ -173,7 +164,7 @@ const MusicRecognition = () => {
         <CardContent className="p-6 md:p-8 text-center">
           <div className="mb-6 md:mb-8">
             <div className={`w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full flex items-center justify-center mb-4 md:mb-6 transition-all duration-300 border-2 active:scale-95 ${
-              isListening 
+              isRecording 
                 ? 'bg-red-500 border-red-500 animate-pulse' 
                 : isProcessing
                 ? 'bg-gray-800 border-gray-800'
@@ -181,7 +172,7 @@ const MusicRecognition = () => {
             }`}>
               {isProcessing ? (
                 <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-white animate-spin" />
-              ) : isListening ? (
+              ) : isRecording ? (
                 <Mic className="w-12 h-12 md:w-16 md:h-16 text-white" />
               ) : (
                 <Music className="w-12 h-12 md:w-16 md:h-16 text-black" />
@@ -189,13 +180,13 @@ const MusicRecognition = () => {
             </div>
             
             <h2 className="text-2xl md:text-3xl font-bold text-black mb-3 md:mb-4">
-              {isProcessing ? 'Identifying Track...' : isListening ? 'Listening...' : 'Ready to Discover'}
+              {isProcessing ? 'Identifying Track...' : isRecording ? 'Listening...' : 'Ready to Discover'}
             </h2>
             
             <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 px-4 md:px-0">
               {isProcessing 
                 ? 'Processing audio securely...' 
-                : isListening 
+                : isRecording 
                 ? 'Recording audio... (max 10 seconds)'
                 : 'Tap to start identifying music and earn $DISCO tokens'
               }
@@ -203,7 +194,7 @@ const MusicRecognition = () => {
           </div>
           
           <div className="space-y-4">
-            {!isListening && !isProcessing ? (
+            {!isRecording && !isProcessing ? (
               <Button 
                 onClick={handleStartListening}
                 size="lg" 
@@ -212,7 +203,7 @@ const MusicRecognition = () => {
                 <Mic className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
                 Start Listening
               </Button>
-            ) : isListening ? (
+            ) : isRecording ? (
               <Button 
                 onClick={handleStopListening}
                 size="lg" 
