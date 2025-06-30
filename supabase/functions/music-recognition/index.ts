@@ -135,6 +135,36 @@ serve(async (req) => {
       return new Response('Method not allowed', { status: 405, headers: corsHeaders });
     }
 
+    const contentType = req.headers.get('content-type') || '';
+    
+    // Handle test requests for credential checking
+    if (contentType.includes('application/json')) {
+      const body = await req.json();
+      if (body.test) {
+        // This is a test request to check credentials
+        const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
+        const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
+        
+        if (!accessKey || !accessSecret) {
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: 'ACRCloud credentials not configured' 
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: 'Credentials are configured' 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Handle form data (audio recognition)
     const formData = await req.formData();
     const audioBlob = formData.get('audio') as File;
 
