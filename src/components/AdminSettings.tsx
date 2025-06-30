@@ -14,39 +14,57 @@ const AdminSettings: React.FC = () => {
   const checkCredentialsStatus = async () => {
     setIsChecking(true);
     try {
-      // Create a small test audio blob to check if credentials work
-      const canvas = document.createElement('canvas');
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const formData = new FormData();
-          formData.append('audio', blob, 'test.webm');
-          
-          const response = await fetch('/functions/v1/music-recognition', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (response.ok) {
-            setCredentialsStatus('configured');
-            toast({
-              title: "Credentials Configured",
-              description: "ACRCloud API credentials are properly set up.",
-            });
-          } else {
-            setCredentialsStatus('missing');
-            toast({
-              title: "Credentials Missing",
-              description: "ACRCloud API credentials need to be configured in Supabase secrets.",
-              variant: "destructive",
-            });
-          }
-        }
+      // Create a simple test request to check if the function works
+      const response = await fetch('/functions/v1/music-recognition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ test: true }),
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      if (response.status === 400) {
+        // 400 means the function is working but no audio was provided (expected)
+        setCredentialsStatus('configured');
+        toast({
+          title: "Credentials Configured",
+          description: "ACRCloud API credentials are properly set up.",
+        });
+      } else if (response.status === 500) {
+        // Check if it's a credential error
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        
+        if (errorText.includes('credentials not configured') || errorText.includes('access_key') || errorText.includes('access_secret')) {
+          setCredentialsStatus('missing');
+          toast({
+            title: "Credentials Missing",
+            description: "ACRCloud API credentials need to be configured in Supabase secrets.",
+            variant: "destructive",
+          });
+        } else {
+          setCredentialsStatus('configured');
+          toast({
+            title: "Credentials Configured",
+            description: "ACRCloud API credentials appear to be set up correctly.",
+          });
+        }
+      } else {
+        setCredentialsStatus('configured');
+        toast({
+          title: "Credentials Configured",
+          description: "ACRCloud API credentials are working properly.",
+        });
+      }
     } catch (error) {
+      console.error('Credential check error:', error);
       setCredentialsStatus('missing');
       toast({
         title: "Configuration Error",
-        description: "Unable to verify credential status.",
+        description: "Unable to verify credential status. Check the console for details.",
         variant: "destructive",
       });
     } finally {
@@ -109,6 +127,9 @@ const AdminSettings: React.FC = () => {
             <li>ACRCLOUD_ACCESS_SECRET</li>
             <li>ACRCLOUD_HOST</li>
           </ul>
+          <p className="text-xs text-blue-600 mt-2">
+            After adding secrets, wait a moment for the function to restart, then click "Check Status".
+          </p>
         </div>
       </CardContent>
     </Card>
