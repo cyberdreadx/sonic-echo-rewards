@@ -5,15 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mic, Square, Loader2, Music, ExternalLink, Youtube } from 'lucide-react';
 import { useAudioRecording } from '@/hooks/useAudioRecording';
-import { ACRCloudService } from '@/services/acrcloudService';
 import { useToast } from '@/hooks/use-toast';
-import ACRCloudSettings from './ACRCloudSettings';
-
-interface ACRCloudCredentials {
-  accessKey: string;
-  accessSecret: string;
-  host: string;
-}
+import { supabase } from '@/integrations/supabase/client';
+import AdminSettings from './AdminSettings';
 
 interface RecognitionResult {
   title: string;
@@ -35,23 +29,12 @@ interface RecognitionResult {
 const MusicRecognition = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<RecognitionResult | null>(null);
-  const [credentials, setCredentials] = useState<ACRCloudCredentials | null>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
   const { toast } = useToast();
 
-  // Define isListening based on isRecording state
   const isListening = isRecording;
 
   const handleStartListening = async () => {
-    if (!credentials) {
-      toast({
-        title: "API Not Configured",
-        description: "Please configure your ACRCloud API credentials first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       clearRecording();
       setResult(null);
@@ -77,34 +60,36 @@ const MusicRecognition = () => {
   };
 
   const processAudio = async () => {
-    if (!audioBlob || !credentials) return;
+    if (!audioBlob) return;
 
     setIsProcessing(true);
     try {
-      const acrService = new ACRCloudService(credentials);
-      const response = await acrService.recognizeAudio(audioBlob);
+      console.log('Processing audio with secure backend...');
       
-      console.log('ACRCloud response:', response);
+      const { data, error } = await supabase.functions.invoke('music-recognition', {
+        body: (() => {
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'audio.webm');
+          return formData;
+        })(),
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Backend response:', data);
       
-      if (response.status.code === 0) {
-        const musicInfo = acrService.formatMusicInfo(response);
-        if (musicInfo) {
-          setResult(musicInfo);
-          toast({
-            title: "Song Identified!",
-            description: `Found: ${musicInfo.title} by ${musicInfo.artists}`,
-          });
-        } else {
-          toast({
-            title: "No Match Found",
-            description: "Could not identify this music. Try recording a clearer sample.",
-            variant: "destructive",
-          });
-        }
+      if (data.success && data.data) {
+        setResult(data.data);
+        toast({
+          title: "Song Identified!",
+          description: `Found: ${data.data.title} by ${data.data.artists}`,
+        });
       } else {
         toast({
-          title: "Recognition Failed",
-          description: response.status.msg || "Could not identify the music.",
+          title: "No Match Found",
+          description: data.error || "Could not identify this music. Try recording a clearer sample.",
           variant: "destructive",
         });
       }
@@ -112,7 +97,7 @@ const MusicRecognition = () => {
       console.error('Recognition error:', error);
       toast({
         title: "Recognition Error",
-        description: "Failed to identify music. Please try again.",
+        description: "Failed to identify music. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -135,7 +120,7 @@ const MusicRecognition = () => {
 
   return (
     <div className="space-y-6">
-      <ACRCloudSettings onCredentialsChange={setCredentials} />
+      <AdminSettings />
       
       <Card className="bg-white border border-gray-200">
         <CardContent className="p-6 md:p-8 text-center">
@@ -162,12 +147,10 @@ const MusicRecognition = () => {
             
             <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 px-4 md:px-0">
               {isProcessing 
-                ? 'Processing audio with ACRCloud...' 
+                ? 'Processing audio securely...' 
                 : isListening 
                 ? 'Recording audio... (max 10 seconds)'
-                : credentials 
-                ? 'Tap to start identifying music and earn $DISCO tokens'
-                : 'Configure ACRCloud API credentials to get started'
+                : 'Tap to start identifying music and earn $DISCO tokens'
               }
             </p>
           </div>
@@ -178,7 +161,6 @@ const MusicRecognition = () => {
                 onClick={handleStartListening}
                 size="lg" 
                 className="bg-black hover:bg-gray-800 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-medium rounded-xl w-full md:w-auto active:scale-95 transition-transform"
-                disabled={!credentials}
               >
                 <Mic className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
                 Start Listening
