@@ -3,14 +3,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Wallet, Bell, Share2, LogOut, Shield } from 'lucide-react';
+import { Settings, Wallet, Bell, Share2, LogOut, Shield, RefreshCw } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 const ProfileSettings = () => {
   const { connected } = useWallet();
-  const { shortAddress, disconnect } = useWalletConnection();
+  const { shortAddress, disconnect, balance, loadingBalance, refreshBalance } = useWalletConnection();
 
   return (
     <div className="space-y-6">
@@ -28,6 +28,30 @@ const ProfileSettings = () => {
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-xs text-gray-600 mb-1">Connected Address</p>
                 <p className="font-mono text-sm text-black">{shortAddress}</p>
+              </div>
+              
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs text-gray-600">SOL Balance</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-1"
+                    onClick={refreshBalance}
+                    disabled={loadingBalance}
+                  >
+                    <RefreshCw className={`w-3 h-3 ${loadingBalance ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                <p className="font-mono text-sm text-black">
+                  {loadingBalance ? (
+                    'Loading...'
+                  ) : balance !== null ? (
+                    `${balance.toFixed(4)} SOL`
+                  ) : (
+                    'Failed to load'
+                  )}
+                </p>
               </div>
               
               <div className="flex items-center justify-between">
