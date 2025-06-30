@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +32,7 @@ const MusicRecognition = () => {
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
   const { toast } = useToast();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingTimeRef = useRef<number>(0);
 
   const isListening = isRecording;
 
@@ -45,12 +47,22 @@ const MusicRecognition = () => {
         clearTimeout(timerRef.current);
       }
       
-      // Auto-stop after 10 seconds
+      // Reset recording time and start countdown
+      recordingTimeRef.current = Date.now();
+      console.log('Starting auto-stop timer for 10 seconds');
+      
+      // Auto-stop after 10 seconds with more reliable timer
       timerRef.current = setTimeout(() => {
-        console.log('Auto-stopping recording after 10 seconds');
-        stopRecording();
+        console.log('Auto-stopping recording after 10 seconds - timer triggered');
+        if (isRecording) {
+          console.log('Recording is still active, stopping now');
+          stopRecording();
+        } else {
+          console.log('Recording already stopped');
+        }
       }, 10000);
     } catch (error) {
+      console.error('Start recording error:', error);
       toast({
         title: "Recording Failed",
         description: "Could not access microphone. Please check permissions.",
@@ -60,16 +72,26 @@ const MusicRecognition = () => {
   };
 
   const handleStopListening = () => {
+    console.log('Manual stop recording triggered');
     // Clear the auto-stop timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
+      console.log('Auto-stop timer cleared');
     }
     stopRecording();
   };
 
-  // Clean up timer on unmount
-  React.useEffect(() => {
+  // Clean up timer on unmount and when recording state changes
+  useEffect(() => {
+    if (!isRecording && timerRef.current) {
+      console.log('Recording stopped, clearing timer');
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [isRecording]);
+
+  useEffect(() => {
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -130,8 +152,9 @@ const MusicRecognition = () => {
   };
 
   // Process audio when recording stops
-  React.useEffect(() => {
+  useEffect(() => {
     if (audioBlob && !isRecording && !isProcessing) {
+      console.log('Audio blob available, processing...');
       processAudio();
     }
   }, [audioBlob, isRecording]);

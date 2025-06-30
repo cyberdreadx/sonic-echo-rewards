@@ -41,8 +41,8 @@ interface ACRCloudResponse {
   };
 }
 
-async function generateSignature(timestamp: number, accessSecret: string): Promise<string> {
-  const stringToSign = `POST\n/v1/identify\n${Deno.env.get('ACRCLOUD_ACCESS_KEY')}\naudio\n1\n${timestamp}`;
+async function generateSignature(timestamp: number, accessSecret: string, accessKey: string): Promise<string> {
+  const stringToSign = `POST\n/v1/identify\n${accessKey}\naudio\n1\n${timestamp}`;
   
   const encoder = new TextEncoder();
   const keyBytes = encoder.encode(accessSecret);
@@ -64,24 +64,19 @@ async function generateSignature(timestamp: number, accessSecret: string): Promi
 }
 
 async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
-  // Debug environment variables access
-  console.log('Environment variables debug:');
-  const allEnvKeys = Object.keys(Deno.env.toObject());
-  console.log('All environment keys:', allEnvKeys);
-  console.log('ACRCloud related keys:', allEnvKeys.filter(k => k.includes('ACRCLOUD')));
+  console.log('Starting music recognition process...');
   
-  // Get credentials from environment variables
+  // Get credentials from environment variables with proper error handling
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
   const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
   const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
 
-  console.log('Credential check:', {
+  console.log('Credentials check:', {
     hasAccessKey: !!accessKey,
     hasAccessSecret: !!accessSecret,
     accessKeyLength: accessKey?.length || 0,
     accessSecretLength: accessSecret?.length || 0,
-    host: host,
-    accessKeyPreview: accessKey ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}` : 'undefined'
+    host: host
   });
 
   if (!accessKey || !accessSecret) {
@@ -90,9 +85,9 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     throw new Error(error);
   }
 
-  // Validate access key format (ACRCloud access keys are typically 32 characters)
-  if (accessKey.length !== 32) {
-    const error = `Invalid access key format - expected 32 characters, got ${accessKey.length}`;
+  // Validate credentials format
+  if (accessKey.length < 10 || accessSecret.length < 10) {
+    const error = `Invalid credential format - Access Key length: ${accessKey.length}, Secret length: ${accessSecret.length}`;
     console.error(error);
     throw new Error(error);
   }
@@ -107,7 +102,7 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   console.log('Audio buffer size:', audioBuffer.byteLength);
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const signature = await generateSignature(timestamp, accessSecret);
+  const signature = await generateSignature(timestamp, accessSecret, accessKey);
   
   // Create form data according to ACRCloud API specification
   const formData = new FormData();
@@ -131,7 +126,7 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     signaturePreview: signature.substring(0, 10) + '...',
     audioSize: audioBuffer.byteLength,
     formDataKeys: Array.from(formData.keys()),
-    accessKeyUsed: accessKey.substring(0, 6) + '...' + accessKey.substring(accessKey.length - 4)
+    accessKeyPreview: accessKey.substring(0, 4) + '...' + accessKey.substring(accessKey.length - 4)
   });
 
   try {
@@ -149,7 +144,7 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     }
 
     const result = await response.json();
-    console.log('ACRCloud API success response:', result);
+    console.log('ACRCloud API response:', result);
     return result;
   } catch (error) {
     console.error('ACRCloud API request failed:', error);
@@ -213,7 +208,6 @@ serve(async (req) => {
           hasAccessSecret: !!accessSecret,
           accessKeyLength: accessKey?.length || 0,
           accessSecretLength: accessSecret?.length || 0,
-          allEnvKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('ACRCLOUD'))
         });
         
         if (!accessKey || !accessSecret) {
