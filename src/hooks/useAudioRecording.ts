@@ -30,11 +30,13 @@ export const useAudioRecording = () => {
       };
 
       mediaRecorder.onstop = () => {
+        console.log('MediaRecorder stopped, creating audio blob');
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(audioBlob);
         
         // Stop all tracks to free up the microphone
         stream.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
       };
 
       mediaRecorder.start();
@@ -47,12 +49,15 @@ export const useAudioRecording = () => {
   }, []);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
+    console.log('stopRecording called, mediaRecorder state:', mediaRecorderRef.current?.state);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      console.log('Stopping MediaRecorder...');
       mediaRecorderRef.current.stop();
+    } else {
+      console.log('MediaRecorder not in recording state or not available');
       setIsRecording(false);
-      console.log('Recording stopped');
     }
-  }, [isRecording]);
+  }, []);
 
   const clearRecording = useCallback(() => {
     setAudioBlob(null);
