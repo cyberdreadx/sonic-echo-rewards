@@ -14,14 +14,18 @@ export const useWalletConnection = () => {
 
   const fetchBalance = async () => {
     if (!publicKey || !connected) {
+      console.log('Cannot fetch balance: publicKey or connected is false', { publicKey: publicKey?.toString(), connected });
       setBalance(null);
       return;
     }
 
+    console.log('Fetching balance for address:', publicKey.toString());
     setLoadingBalance(true);
     try {
       const lamports = await connection.getBalance(publicKey);
+      console.log('Balance in lamports:', lamports);
       const solBalance = lamports / LAMPORTS_PER_SOL;
+      console.log('Balance in SOL:', solBalance);
       setBalance(solBalance);
     } catch (error) {
       console.error('Failed to fetch balance:', error);
@@ -33,8 +37,10 @@ export const useWalletConnection = () => {
 
   useEffect(() => {
     if (connected && publicKey) {
+      console.log('Wallet connected, fetching balance...');
       fetchBalance();
     } else {
+      console.log('Wallet not connected, clearing balance');
       setBalance(null);
     }
   }, [connected, publicKey, connection]);
