@@ -64,49 +64,55 @@ async function generateSignature(timestamp: number, accessSecret: string): Promi
 }
 
 async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
-  // Get credentials from environment variables with explicit error handling
+  // Debug environment variables access
+  console.log('Environment variables debug:');
+  const allEnvKeys = Object.keys(Deno.env.toObject());
+  console.log('All environment keys:', allEnvKeys);
+  console.log('ACRCloud related keys:', allEnvKeys.filter(k => k.includes('ACRCLOUD')));
+  
+  // Get credentials from environment variables
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
   const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
   const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
 
-  console.log('Environment check:', {
+  console.log('Credential check:', {
     hasAccessKey: !!accessKey,
     hasAccessSecret: !!accessSecret,
-    host: host,
     accessKeyLength: accessKey?.length || 0,
-    accessSecretLength: accessSecret?.length || 0
+    accessSecretLength: accessSecret?.length || 0,
+    host: host,
+    accessKeyPreview: accessKey ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}` : 'undefined'
   });
 
   if (!accessKey || !accessSecret) {
-    console.error('Missing credentials:', { 
-      accessKey: !!accessKey, 
-      accessSecret: !!accessSecret,
-      allEnvKeys: Object.keys(Deno.env.toObject())
-    });
-    throw new Error('ACRCloud credentials not configured');
+    const error = `Missing ACRCloud credentials - Access Key: ${!!accessKey}, Access Secret: ${!!accessSecret}`;
+    console.error(error);
+    throw new Error(error);
   }
 
-  // Validate that the access key looks correct (should be 32 characters)
+  // Validate access key format (ACRCloud access keys are typically 32 characters)
   if (accessKey.length !== 32) {
-    console.error('Access key appears invalid:', { length: accessKey.length });
-    throw new Error('ACRCloud access key format appears invalid');
+    const error = `Invalid access key format - expected 32 characters, got ${accessKey.length}`;
+    console.error(error);
+    throw new Error(error);
   }
 
-  console.log('Audio blob details:', {
-    size: audioBlob.size,
-    type: audioBlob.type
+  console.log('Audio processing:', {
+    blobSize: audioBlob.size,
+    blobType: audioBlob.type
   });
 
-  // Convert audio blob to array buffer for processing
+  // Convert to ArrayBuffer for processing
   const audioBuffer = await audioBlob.arrayBuffer();
   console.log('Audio buffer size:', audioBuffer.byteLength);
 
   const timestamp = Math.floor(Date.now() / 1000);
   const signature = await generateSignature(timestamp, accessSecret);
   
+  // Create form data according to ACRCloud API specification
   const formData = new FormData();
   
-  // Create a proper File object from the audio buffer
+  // Create proper File object from audio data
   const audioFile = new File([audioBuffer], 'audio.webm', { 
     type: 'audio/webm' 
   });
@@ -119,29 +125,36 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   formData.append('timestamp', timestamp.toString());
   formData.append('sample_bytes', audioBuffer.byteLength.toString());
   
-  console.log('Sending request to ACRCloud:', {
+  console.log('API request details:', {
     host,
     timestamp,
-    signature: signature.substring(0, 10) + '...',
+    signaturePreview: signature.substring(0, 10) + '...',
     audioSize: audioBuffer.byteLength,
-    formDataEntries: Array.from(formData.keys()),
-    accessKey: accessKey.substring(0, 8) + '...' + accessKey.substring(accessKey.length - 4)
+    formDataKeys: Array.from(formData.keys()),
+    accessKeyUsed: accessKey.substring(0, 6) + '...' + accessKey.substring(accessKey.length - 4)
   });
 
-  const response = await fetch(`https://${host}/v1/identify`, {
-    method: 'POST',
-    body: formData,
-  });
+  try {
+    const response = await fetch(`https://${host}/v1/identify`, {
+      method: 'POST',
+      body: formData,
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('ACRCloud API error response:', errorText);
-    throw new Error(`ACRCloud API error: ${response.status} ${response.statusText}`);
+    console.log('API response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('ACRCloud API error response:', errorText);
+      throw new Error(`ACRCloud API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('ACRCloud API success response:', result);
+    return result;
+  } catch (error) {
+    console.error('ACRCloud API request failed:', error);
+    throw error;
   }
-
-  const result = await response.json();
-  console.log('ACRCloud raw response:', result);
-  return result;
 }
 
 function formatMusicInfo(response: ACRCloudResponse) {
@@ -190,10 +203,12 @@ serve(async (req) => {
     if (contentType.includes('application/json')) {
       const body = await req.json();
       if (body.test) {
+        console.log('Credential test request received');
+        
         const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
         const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
         
-        console.log('Credential test - Environment check:', {
+        console.log('Test - Environment check:', {
           hasAccessKey: !!accessKey,
           hasAccessSecret: !!accessSecret,
           accessKeyLength: accessKey?.length || 0,
@@ -204,7 +219,7 @@ serve(async (req) => {
         if (!accessKey || !accessSecret) {
           return new Response(JSON.stringify({ 
             success: false, 
-            error: 'ACRCloud credentials not configured' 
+            error: 'ACRCloud credentials not configured in Supabase secrets' 
           }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -213,7 +228,7 @@ serve(async (req) => {
         
         return new Response(JSON.stringify({ 
           success: true, 
-          message: 'Credentials are configured' 
+          message: 'ACRCloud credentials are properly configured' 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -235,10 +250,10 @@ serve(async (req) => {
       });
     }
 
-    console.log('Processing audio recognition request for file:', {
-      name: audioFile.name,
-      size: audioFile.size,
-      type: audioFile.type
+    console.log('Processing audio recognition request:', {
+      fileName: audioFile.name,
+      fileSize: audioFile.size,
+      fileType: audioFile.type
     });
 
     const response = await recognizeAudio(audioFile);
@@ -261,7 +276,7 @@ serve(async (req) => {
         });
       }
     } else {
-      console.log('ACRCloud error:', response.status);
+      console.log('ACRCloud API returned error:', response.status);
       return new Response(JSON.stringify({ 
         success: false, 
         error: `ACRCloud error: ${response.status.msg} (Code: ${response.status.code})` 
@@ -271,7 +286,7 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Music recognition error:', error);
+    console.error('Music recognition function error:', error);
     return new Response(JSON.stringify({ 
       success: false, 
       error: `Recognition failed: ${error.message}` 
