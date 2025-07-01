@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ACRCloud Real Audio Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 10px; padding: 10px 20px; }
+        .log { margin: 10px 0; padding: 5px; background: #f0f0f0; font-family: monospace; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>ACRCloud Real Audio Test</h1>
+    
+    <div>
+        <button onclick="testCredentials()">1. Test Credentials</button>
+        <button onclick="testRealAudio()">2. Record Real Audio (10s)</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="status"></div>
+    <div id="logs"></div>
+
+    <script>
+        const supabaseUrl = 'https://ixhqkljpsqwycmxckkzx.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4aHFrbGpwc3F3eWNteGNra3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMzMjAzMzAsImV4cCI6MjA0ODg5NjMzMH0.Hu5TqnvjOrvCMtTBgHB7NrHnQZTJBYGqPOFVJo2nTNY';
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(div);
+            console.log(message);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function setStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function callSupabaseFunction(endpoint, body) {
+            const response = await fetch(`${supabaseUrl}/functions/v1/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'Content-Type': body instanceof FormData ? undefined : 'application/json'
+                },
+                body: body instanceof FormData ? body : JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        }
+
+        async function testCredentials() {
+            log('Testing ACRCloud credentials...', 'info');
+            try {
+                const result = await callSupabaseFunction('music-recognition', { test: true });
+                
+                if (result.success) {
+                    log('✅ Credentials are properly configured!', 'success');
+                    return true;
+                } else {
+                    log('❌ Credentials test failed: ' + JSON.stringify(result), 'error');
+                    return false;
+                }
+            } catch (error) {
+                log('❌ Credentials test error: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        async function testRealAudio() {
+            log('Starting real audio test...', 'info');
+            
+            try {
+                // Check credentials first
+                const credentialsOk = await testCredentials();
+                if (!credentialsOk) {
+                    log('❌ Skipping audio test - credentials not working', 'error');
+                    return;
+                }
+
+                setStatus('🎤 Recording audio for 10 seconds... Play some music!');
+                log('Requesting microphone access...', 'info');
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        sampleRate: 44100,
+                        channelCount: 1,
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                });
+
+                log('✅ Microphone access granted', 'success');
+
+                // Determine best MIME type
+                let mimeType = 'audio/webm';
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    mimeType = 'audio/webm;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    mimeType = 'audio/mp4';
+                } else if (MediaRecorder.isTypeSupported('audio/wav')) {
+                    mimeType = 'audio/wav';
+                }
+
+                log('Using audio format: ' + mimeType, 'info');
+
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: mimeType,
+                    audioBitsPerSecond: 128000
+                });
+
+                let chunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(chunks, { type: mimeType });
+                    
+                    log(`✅ Audio recorded: ${audioBlob.size} bytes, type: ${audioBlob.type}`, 'success');
+                    setStatus('🔍 Sending to ACRCloud for recognition...');
+
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+
+                    // Send to ACRCloud
+                    await sendToACRCloud(audioBlob);
+                };
+
+                log('🔴 Recording started...', 'warning');
+                mediaRecorder.start();
+
+                // Stop after 10 seconds
+                setTimeout(() => {
+                    log('⏹️ Stopping recording...', 'info');
+                    mediaRecorder.stop();
+                }, 10000);
+
+            } catch (error) {
+                log('❌ Audio recording error: ' + error.message, 'error');
+                setStatus('❌ Recording failed');
+            }
+        }
+
+        async function sendToACRCloud(audioBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.' + audioBlob.type.split('/')[1]);
+
+                log('Sending audio to ACRCloud...', 'info');
+                const result = await callSupabaseFunction('music-recognition', formData);
+
+                if (result.success && result.data) {
+                    log('🎵 Music identified!', 'success');
+                    log(`Title: ${result.data.title}`, 'success');
+                    log(`Artist: ${result.data.artists}`, 'success');
+                    log(`Confidence: ${result.data.score}%`, 'success');
+                    setStatus('✅ Music identified successfully!');
+                } else {
+                    const errorMsg = result.error || 'No match found';
+                    log('ℹ️ No music match: ' + errorMsg, 'warning');
+                    setStatus('❌ No music recognized');
+                    
+                    // Log specific error codes for debugging
+                    if (errorMsg.includes('2004')) {
+                        log('Error 2004: Cannot generate fingerprint - audio quality/format issue', 'error');
+                    } else if (errorMsg.includes('1001')) {
+                        log('Error 1001: No result - music not in database', 'warning');
+                    }
+                }
+            } catch (error) {
+                log('❌ ACRCloud communication error: ' + error.message, 'error');
+                setStatus('❌ Recognition failed');
+            }
+        }
+    </script>
+</body>
+</html>

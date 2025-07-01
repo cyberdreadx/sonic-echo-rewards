@@ -13,11 +13,27 @@ export const useAudioRecording = () => {
         audio: {
           sampleRate: 44100,
           channelCount: 1,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
         } 
       });
 
+      // Try to use the best available audio format for ACRCloud
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/wav')) {
+        mimeType = 'audio/wav';
+      }
+
+      console.log('Using MIME type:', mimeType);
+
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm'
+        mimeType: mimeType,
+        audioBitsPerSecond: 128000 // Higher bitrate for better quality
       });
 
       mediaRecorderRef.current = mediaRecorder;
@@ -31,7 +47,12 @@ export const useAudioRecording = () => {
 
       mediaRecorder.onstop = () => {
         console.log('MediaRecorder stopped, creating audio blob');
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+        console.log('Audio blob created:', {
+          size: audioBlob.size,
+          type: audioBlob.type,
+          chunks: chunksRef.current.length
+        });
         setAudioBlob(audioBlob);
         
         // Stop all tracks to free up the microphone

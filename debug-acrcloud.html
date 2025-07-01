@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ACRCloud Debug Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>ACRCloud API Debug Test</h1>
+    <button onclick="testCredentials()">Test Credentials</button>
+    <button onclick="testAudioRecording()">Test Audio Recording</button>
+    <button onclick="testWithSampleAudio()">Test with Sample Audio</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            'https://ixhqkljpsqwycmxckkzx.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4aHFrbGpwc3F3eWNteGNra3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMzMjAzMzAsImV4cCI6MjA0ODg5NjMzMH0.Hu5TqnvjOrvCMtTBgHB7NrHnQZTJBYGqPOFVJo2nTNY'
+        );
+
+        function log(message) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        async function testCredentials() {
+            log('Testing Supabase function credentials...');
+            try {
+                const { data, error } = await supabase.functions.invoke('music-recognition', {
+                    body: { test: true }
+                });
+                
+                if (error) {
+                    log('❌ Error: ' + error.message);
+                } else if (data?.success) {
+                    log('✅ Credentials are configured correctly!');
+                } else {
+                    log('❌ Credentials test failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                log('❌ Exception: ' + error.message);
+            }
+        }
+
+        async function testAudioRecording() {
+            log('Testing microphone access...');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 44100,
+                        channelCount: 1,
+                    } 
+                });
+                
+                log('✅ Microphone access granted');
+                
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm'
+                });
+                
+                let chunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+                    log('✅ Audio recorded: ' + audioBlob.size + ' bytes');
+                    
+                    // Test sending to Supabase function
+                    await testAudioWithSupabase(audioBlob);
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                log('🎤 Recording for 5 seconds... (play some music!)');
+                mediaRecorder.start();
+                
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 5000);
+                
+            } catch (error) {
+                log('❌ Microphone error: ' + error.message);
+            }
+        }
+
+        async function testAudioWithSupabase(audioBlob) {
+            log('Testing audio recognition with Supabase function...');
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                
+                const { data, error } = await supabase.functions.invoke('music-recognition', {
+                    body: formData,
+                });
+                
+                if (error) {
+                    log('❌ Supabase function error: ' + error.message);
+                } else if (data?.success && data?.data) {
+                    log('✅ Music identified: ' + data.data.title + ' by ' + data.data.artists);
+                    log('Score: ' + data.data.score + '%');
+                } else {
+                    log('ℹ️  No match found: ' + (data?.error || 'Unknown reason'));
+                }
+            } catch (error) {
+                log('❌ Exception: ' + error.message);
+            }
+        }
+
+        async function testWithSampleAudio() {
+            log('Creating test audio blob...');
+            
+            // Create a simple test audio file (silence)
+            const audioContext = new AudioContext();
+            const sampleRate = audioContext.sampleRate;
+            const duration = 3; // 3 seconds
+            const length = sampleRate * duration;
+            const buffer = audioContext.createBuffer(1, length, sampleRate);
+            
+            // Fill with silence (this won't match any music, but tests the API)
+            const channelData = buffer.getChannelData(0);
+            for (let i = 0; i < length; i++) {
+                channelData[i] = 0;
+            }
+            
+            // Note: This is just a test - real audio would be needed for actual recognition
+            log('⚠️  This is a silence test - no music will be recognized');
+            
+            // Convert to blob (simplified - in real scenario you'd need proper audio encoding)
+            const testBlob = new Blob([new ArrayBuffer(1024)], { type: 'audio/webm' });
+            await testAudioWithSupabase(testBlob);
+        }
+    </script>
+</body>
+</html>

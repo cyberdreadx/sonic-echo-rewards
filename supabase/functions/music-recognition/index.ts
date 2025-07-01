@@ -82,6 +82,7 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   if (!accessKey || !accessSecret) {
     const error = `Missing ACRCloud credentials - Access Key: ${!!accessKey}, Access Secret: ${!!accessSecret}`;
     console.error(error);
+    console.error('Available environment variables:', Object.keys(Deno.env.toObject()));
     throw new Error(error);
   }
 
@@ -97,6 +98,11 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     blobType: audioBlob.type
   });
 
+  // Validate audio size
+  if (audioBlob.size < 10000) { // Less than 10KB is probably too small
+    throw new Error(`Audio file too small: ${audioBlob.size} bytes - ACRCloud needs at least 3-5 seconds of audio`);
+  }
+
   // Convert to ArrayBuffer for processing
   const audioBuffer = await audioBlob.arrayBuffer();
   console.log('Audio buffer size:', audioBuffer.byteLength);
@@ -109,7 +115,13 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   
   // Create proper File object from audio data
   const audioFile = new File([audioBuffer], 'audio.webm', { 
-    type: 'audio/webm' 
+    type: audioBlob.type || 'audio/webm' 
+  });
+  
+  console.log('Created audio file:', {
+    name: audioFile.name,
+    size: audioFile.size,
+    type: audioFile.type
   });
   
   formData.append('sample', audioFile);
@@ -251,6 +263,12 @@ serve(async (req) => {
     });
 
     const response = await recognizeAudio(audioFile);
+    console.log('Recognition response received:', {
+      statusCode: response.status.code,
+      statusMessage: response.status.msg,
+      hasMetadata: !!response.metadata,
+      hasMusic: !!response.metadata?.music?.[0]
+    });
 
     if (response.status.code === 0) {
       const musicInfo = formatMusicInfo(response);
