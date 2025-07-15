@@ -27,36 +27,25 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      // Fetch auth users and their roles
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        console.error('Error fetching users:', authError);
-        return;
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error('No session');
       }
 
-      // Fetch user roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) {
-        console.error('Error fetching roles:', rolesError);
-        return;
-      }
-
-      // Combine users with their roles
-      const usersWithRoles = authUsers.users.map(user => {
-        const userRole = userRoles?.find(role => role.user_id === user.id);
-        return {
-          id: user.id,
-          email: user.email || 'No email',
-          created_at: user.created_at,
-          role: userRole?.role || 'user'
-        };
+      const response = await fetch('/functions/v1/admin-get-users', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      setUsers(usersWithRoles);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setUsers(result.users || []);
     } catch (error) {
       console.error('Error:', error);
       toast({
