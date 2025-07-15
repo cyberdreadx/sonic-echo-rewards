@@ -11,33 +11,32 @@ const UserProfileHeader = () => {
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <Avatar className="w-20 h-20 md:w-24 md:h-24">
-            <AvatarImage src="/placeholder.svg" alt="Profile" />
-            <AvatarFallback className="text-xl font-bold bg-gray-100">DJ</AvatarFallback>
+            <AvatarFallback className="text-xl font-bold bg-gray-100 text-gray-400">?</AvatarFallback>
           </Avatar>
           
           <div className="flex-1 space-y-3">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-black">DJ MusicLover</h1>
-              <p className="text-gray-600">@musiclover_47</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-400">No Profile Yet</h1>
+              <p className="text-gray-400">Connect your wallet to get started</p>
             </div>
             
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="bg-black text-white">
+              <Badge variant="outline" className="text-gray-400 border-gray-300">
                 <Trophy className="w-3 h-3 mr-1" />
-                Rank #47
+                No Rank Yet
               </Badge>
-              <Badge variant="outline">Top Discoverer</Badge>
-              <Badge variant="outline">12 Day Streak</Badge>
+              <Badge variant="outline" className="text-gray-400 border-gray-300">New User</Badge>
+              <Badge variant="outline" className="text-gray-400 border-gray-300">0 Day Streak</Badge>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-400">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                Joined December 2023
+                Not joined yet
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                San Francisco, CA
+                Location unknown
               </div>
             </div>
           </div>

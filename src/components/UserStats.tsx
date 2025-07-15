@@ -7,22 +7,22 @@ const UserStats = () => {
   const stats = [
     {
       title: "Today's Earnings",
-      value: "47.3 $DISCO",
+      value: "0 $DISCO",
       icon: TrendingUp,
     },
     {
       title: "Tracks Identified",
-      value: "1,829",
+      value: "0",
       icon: Music,
     },
     {
       title: "Discovery Rank",
-      value: "#47",
+      value: "Unranked",
       icon: Award,
     },
     {
       title: "Streak",
-      value: "12 days",
+      value: "0 days",
       icon: Clock,
     }
   ];

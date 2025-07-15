@@ -7,38 +7,38 @@ const ProfileStats = () => {
   const stats = [
     {
       title: "Total Earnings",
-      value: "1,247 $DISCO",
-      change: "+47.3 today",
+      value: "0 $DISCO",
+      change: "Start discovering!",
       icon: Coins,
-      trend: "up"
+      trend: "neutral"
     },
     {
       title: "Tracks Discovered",
-      value: "1,829",
-      change: "+12 this week",
+      value: "0",
+      change: "No discoveries yet",
       icon: Music,
-      trend: "up"
+      trend: "neutral"
     },
     {
       title: "Active Streak",
-      value: "12 days",
-      change: "Best: 28 days",
+      value: "0 days",
+      change: "Begin your journey",
       icon: Clock,
       trend: "neutral"
     },
     {
       title: "Referrals",
-      value: "23",
-      change: "+3 this month",
+      value: "0",
+      change: "Invite friends",
       icon: Users,
-      trend: "up"
+      trend: "neutral"
     },
     {
       title: "Monthly Rank",
-      value: "#47",
-      change: "↑ 12 positions",
+      value: "Unranked",
+      change: "No activity yet",
       icon: TrendingUp,
-      trend: "up"
+      trend: "neutral"
     }
   ];
 
