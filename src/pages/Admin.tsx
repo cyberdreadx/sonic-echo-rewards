@@ -8,6 +8,7 @@ import { Shield, Users, Settings, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import AdminSettings from '@/components/AdminSettings';
+import AppHeader from '@/components/AppHeader';
 
 interface User {
   id: string;
@@ -105,7 +106,9 @@ const Admin = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="min-h-screen bg-gray-50">
+      <AppHeader />
+      <div className="container mx-auto p-6 space-y-8">
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
           <Settings className="w-6 h-6 text-primary-foreground" />
@@ -193,6 +196,7 @@ const Admin = () => {
           </Table>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
