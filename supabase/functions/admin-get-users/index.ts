@@ -15,43 +15,38 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('Admin get users function called');
     
-    // Get the authorization header
+    // Create supabase clients
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Get JWT from the request (Supabase handles this automatically when verify_jwt = true)
     const authHeader = req.headers.get("authorization");
-    console.log('Auth header present:', !!authHeader);
+    const jwt = authHeader?.replace("Bearer ", "");
     
-    if (!authHeader) {
-      console.log('No authorization header found');
+    if (!jwt) {
+      console.log('No JWT token found');
       return new Response(
-        JSON.stringify({ error: "No authorization header" }),
+        JSON.stringify({ error: "No authorization token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Create regular client to verify user permissions
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { authorization: authHeader },
-        },
-      }
-    );
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('User check result:', { user: !!user, error: userError });
+    // Verify and get user from JWT
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(jwt);
+    console.log('User verification result:', { user: !!user, error: userError });
     
     if (userError || !user) {
-      console.log('User authentication failed:', userError);
+      console.log('User verification failed:', userError);
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Check if user is admin
-    const { data: userRole, error: roleError } = await supabase
+    const { data: userRole, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
@@ -66,12 +61,6 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Create supabase client with service role for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
 
     // Fetch all users using admin client
     console.log('Fetching users...');
@@ -118,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error('Error in admin-get-users function:', error);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: "Internal server error", details: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

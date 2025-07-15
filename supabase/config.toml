@@ -3,3 +3,6 @@ project_id = "ixhqkljpsqwycmxckkzx"
 
 [functions.music-recognition]
 verify_jwt = false
+
+[functions.admin-get-users]
+verify_jwt = true
