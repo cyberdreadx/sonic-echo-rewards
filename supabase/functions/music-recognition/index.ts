@@ -63,8 +63,55 @@ async function generateSignature(timestamp: number, accessSecret: string, access
   return base64Signature;
 }
 
+async function recognizeAudioWithBucket(audioBlob: Blob, bucketName?: string): Promise<ACRCloudResponse> {
+  const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
+  const accessSecret = Deno.env.get('ACRCLOUD_ACCESS_SECRET');
+  const host = Deno.env.get('ACRCLOUD_HOST') || 'identify-eu-west-1.acrcloud.com';
+
+  if (!accessKey || !accessSecret) {
+    throw new Error(`Missing ACRCloud credentials`);
+  }
+
+  const audioBuffer = await audioBlob.arrayBuffer();
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = await generateSignature(timestamp, accessSecret, accessKey);
+  
+  const formData = new FormData();
+  const audioFile = new File([audioBuffer], 'audio.webm', { 
+    type: audioBlob.type || 'audio/webm' 
+  });
+  
+  formData.append('sample', audioFile);
+  formData.append('access_key', accessKey);
+  formData.append('data_type', 'audio');
+  formData.append('signature_version', '1');
+  formData.append('signature', signature);
+  formData.append('timestamp', timestamp.toString());
+  formData.append('sample_bytes', audioBuffer.byteLength.toString());
+  
+  if (bucketName) {
+    formData.append('rec_type', 'audio');
+    formData.append('bucket_name', bucketName);
+    console.log(`Checking custom bucket: ${bucketName}`);
+  } else {
+    console.log('Checking ACRCloud music database');
+  }
+
+  const response = await fetch(`https://${host}/v1/identify`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`ACRCloud API error: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  return await response.json();
+}
+
 async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
-  console.log('Starting music recognition process...');
+  console.log('Starting dual music recognition process...');
   
   // Get credentials from environment variables with proper error handling
   const accessKey = Deno.env.get('ACRCLOUD_ACCESS_KEY');
@@ -103,65 +150,33 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
     throw new Error(`Audio file too small: ${audioBlob.size} bytes - ACRCloud needs at least 3-5 seconds of audio`);
   }
 
-  // Convert to ArrayBuffer for processing
-  const audioBuffer = await audioBlob.arrayBuffer();
-  console.log('Audio buffer size:', audioBuffer.byteLength);
-
-  const timestamp = Math.floor(Date.now() / 1000);
-  const signature = await generateSignature(timestamp, accessSecret, accessKey);
-  
-  // Create form data according to ACRCloud API specification
-  const formData = new FormData();
-  
-  // Create proper File object from audio data
-  const audioFile = new File([audioBuffer], 'audio.webm', { 
-    type: audioBlob.type || 'audio/webm' 
-  });
-  
-  console.log('Created audio file:', {
-    name: audioFile.name,
-    size: audioFile.size,
-    type: audioFile.type
-  });
-  
-  formData.append('sample', audioFile);
-  formData.append('access_key', accessKey);
-  formData.append('data_type', 'audio');
-  formData.append('signature_version', '1');
-  formData.append('signature', signature);
-  formData.append('timestamp', timestamp.toString());
-  formData.append('sample_bytes', audioBuffer.byteLength.toString());
-  formData.append('rec_type', 'audio');
-  formData.append('bucket_name', 'disconium_music');
-  
-  console.log('API request details:', {
-    host,
-    timestamp,
-    signaturePreview: signature.substring(0, 10) + '...',
-    audioSize: audioBuffer.byteLength,
-    formDataKeys: Array.from(formData.keys()),
-    accessKeyPreview: accessKey.substring(0, 4) + '...' + accessKey.substring(accessKey.length - 4)
-  });
+  console.log('Audio buffer size:', audioBlob.size);
 
   try {
-    const response = await fetch(`https://${host}/v1/identify`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    console.log('API response status:', response.status, response.statusText);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('ACRCloud API error response:', errorText);
-      throw new Error(`ACRCloud API error: ${response.status} ${response.statusText} - ${errorText}`);
+    // First, try custom bucket
+    console.log('Step 1: Checking custom bucket "disconium_music"...');
+    const customResult = await recognizeAudioWithBucket(audioBlob, 'disconium_music');
+    
+    if (customResult.status.code === 0) {
+      console.log('✅ Found match in custom bucket!');
+      return { ...customResult, source: 'custom_bucket' };
     }
-
-    const result = await response.json();
-    console.log('ACRCloud API response:', result);
-    return result;
+    
+    console.log('Step 2: No match in custom bucket, checking ACRCloud music database...');
+    
+    // If no result from custom bucket, try general ACRCloud music database
+    const generalResult = await recognizeAudioWithBucket(audioBlob);
+    
+    if (generalResult.status.code === 0) {
+      console.log('✅ Found match in ACRCloud music database!');
+      return { ...generalResult, source: 'acrcloud_music' };
+    }
+    
+    console.log('❌ No matches found in either source');
+    return generalResult; // Return the last result (will have error code)
+    
   } catch (error) {
-    console.error('ACRCloud API request failed:', error);
+    console.error('Music recognition failed:', error);
     throw error;
   }
 }
