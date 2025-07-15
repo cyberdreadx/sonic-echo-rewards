@@ -131,6 +131,8 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
   formData.append('signature', signature);
   formData.append('timestamp', timestamp.toString());
   formData.append('sample_bytes', audioBuffer.byteLength.toString());
+  formData.append('rec_type', 'audio');
+  formData.append('bucket_name', 'disconium_music');
   
   console.log('API request details:', {
     host,
