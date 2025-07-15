@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Wallet, Bell, Share2, LogOut, Shield, RefreshCw, Link, Unlink } from 'lucide-react';
+import { Settings, Wallet, Bell, Share2, LogOut, Shield, RefreshCw, Link, Unlink, UserPlus } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
@@ -16,6 +16,7 @@ const ProfileSettings = () => {
   const { toast } = useToast();
   const [linkedWallet, setLinkedWallet] = useState<string | null>(null);
   const [isLinking, setIsLinking] = useState(false);
+  const [walletAccountStatus, setWalletAccountStatus] = useState<'checking' | 'current-user' | 'other-user' | 'unlinked' | null>(null);
 
   // Fetch user's linked wallet on component mount
   useEffect(() => {
@@ -36,6 +37,89 @@ const ProfileSettings = () => {
 
     fetchLinkedWallet();
   }, []);
+
+  // Check wallet account status when wallet changes
+  useEffect(() => {
+    const checkWalletStatus = async () => {
+      if (!publicKey || !connected) {
+        setWalletAccountStatus(null);
+        return;
+      }
+
+      setWalletAccountStatus('checking');
+      const walletAddress = publicKey.toString();
+
+      try {
+        // Check if this wallet belongs to any account
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('wallet_address', walletAddress)
+          .maybeSingle();
+
+        if (!profile) {
+          setWalletAccountStatus('unlinked');
+          return;
+        }
+
+        // Check if it's the current user's wallet
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && profile.user_id === user.id) {
+          setWalletAccountStatus('current-user');
+        } else {
+          setWalletAccountStatus('other-user');
+        }
+      } catch (error) {
+        console.error('Error checking wallet status:', error);
+        setWalletAccountStatus('unlinked');
+      }
+    };
+
+    checkWalletStatus();
+  }, [publicKey, connected]);
+
+  const switchToWalletAccount = async () => {
+    if (!publicKey) return;
+
+    setIsLinking(true);
+    try {
+      // Sign out current user
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Account Switch Required",
+        description: "Please sign in to the account that owns this wallet.",
+      });
+      
+      // In a real app, you might redirect to login page here
+      // For now, we'll just refresh the page
+      window.location.reload();
+    } catch (error) {
+      console.error('Error switching accounts:', error);
+      toast({
+        title: "Switch Failed",
+        description: "Failed to switch accounts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
+  const createNewAccount = async () => {
+    toast({
+      title: "Create New Account",
+      description: "Please sign out and create a new account to use this wallet.",
+    });
+    
+    try {
+      await supabase.auth.signOut();
+      // In a real app, redirect to signup page
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const linkWallet = async () => {
     if (!publicKey || !connected) {
@@ -203,19 +287,23 @@ const ProfileSettings = () => {
                     Disconnect
                   </Button>
                   
-                  {linkedWallet ? (
-                    publicKey?.toString() === linkedWallet ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={unlinkWallet}
-                        disabled={isLinking}
-                        className="flex-1"
-                      >
-                        <Unlink className="w-3 h-3 mr-1" />
-                        {isLinking ? 'Unlinking...' : 'Unlink'}
-                      </Button>
-                    ) : (
+                  {walletAccountStatus === 'checking' ? (
+                    <Button variant="outline" size="sm" disabled className="flex-1">
+                      Checking...
+                    </Button>
+                  ) : walletAccountStatus === 'other-user' ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={switchToWalletAccount}
+                      disabled={isLinking}
+                      className="flex-1 text-blue-600 hover:text-blue-700"
+                    >
+                      <UserPlus className="w-3 h-3 mr-1" />
+                      Switch Account
+                    </Button>
+                  ) : walletAccountStatus === 'unlinked' ? (
+                    <div className="flex gap-1 flex-1">
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -224,9 +312,29 @@ const ProfileSettings = () => {
                         className="flex-1"
                       >
                         <Link className="w-3 h-3 mr-1" />
-                        {isLinking ? 'Linking...' : 'Link Current'}
+                        {isLinking ? 'Linking...' : 'Link'}
                       </Button>
-                    )
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={createNewAccount}
+                        className="flex-1 text-green-600 hover:text-green-700"
+                      >
+                        <UserPlus className="w-3 h-3 mr-1" />
+                        New Account
+                      </Button>
+                    </div>
+                  ) : walletAccountStatus === 'current-user' ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={unlinkWallet}
+                      disabled={isLinking}
+                      className="flex-1"
+                    >
+                      <Unlink className="w-3 h-3 mr-1" />
+                      {isLinking ? 'Unlinking...' : 'Unlink'}
+                    </Button>
                   ) : (
                     <Button 
                       variant="outline" 
