@@ -7,6 +7,7 @@ import { Mic, Square, Loader2, Music, ExternalLink, Youtube } from 'lucide-react
 import { useAudioRecording } from '@/hooks/useAudioRecording';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdminView } from '@/contexts/AdminViewContext';
 import AdminSettings from './AdminSettings';
 
 interface RecognitionResult {
@@ -27,6 +28,7 @@ interface RecognitionResult {
 }
 
 const MusicRecognition = () => {
+  const { showAdminFeatures } = useAdminView();
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecording();
@@ -158,7 +160,7 @@ const MusicRecognition = () => {
 
   return (
     <div className="space-y-6">
-      <AdminSettings />
+      {showAdminFeatures && <AdminSettings />}
       
       <Card className="bg-white border border-gray-200">
         <CardContent className="p-6 md:p-8 text-center">
