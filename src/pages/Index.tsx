@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminView } from '@/contexts/AdminViewContext';
 import AppHeader from '@/components/AppHeader';
 import MusicRecognition from '@/components/MusicRecognition';
 import AdSpace from '@/components/AdSpace';
@@ -10,6 +11,7 @@ import ACRCloudDebugger from '@/components/ACRCloudDebugger';
 
 const Index = () => {
   const { user } = useAuth();
+  const { showAdminFeatures } = useAdminView();
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -25,7 +27,7 @@ const Index = () => {
             </Button>
           </div>
         )}
-        <ACRCloudDebugger />
+        {showAdminFeatures && <ACRCloudDebugger />}
         <MusicRecognition />
         <AdSpace />
       </main>

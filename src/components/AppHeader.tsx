@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3, LogOut, LogIn } from 'lucide-react';
+import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3, LogOut, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminView } from '@/contexts/AdminViewContext';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ const AppHeader = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const { isAdminViewMode, toggleAdminView, showAdminFeatures } = useAdminView();
   const { toast } = useToast();
 
   const navigationItems = [
@@ -115,7 +117,34 @@ const AppHeader = () => {
             ))}
           </nav>
           
+          {/* Admin View Toggle */}
           <div className="flex items-center gap-1 md:gap-4 flex-shrink-0">
+            {/* Admin View Toggle Button */}
+            {isAdmin() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleAdminView}
+                className={`hidden md:flex items-center gap-1 px-2 py-1 text-xs ${
+                  isAdminViewMode 
+                    ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                }`}
+              >
+                {isAdminViewMode ? (
+                  <>
+                    <EyeOff className="w-3 h-3" />
+                    User
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3 h-3" />
+                    Admin
+                  </>
+                )}
+              </Button>
+            )}
+
             {/* Mobile: Compact token display */}
             <div className="flex items-center gap-1 bg-gray-100 px-1.5 py-1 md:px-3 md:py-2 rounded border border-gray-200">
               <Coins className="w-3 h-3 md:w-4 md:h-4 text-black flex-shrink-0" />
@@ -145,12 +174,27 @@ const AppHeader = () => {
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  {isAdmin() && (
+                  {showAdminFeatures && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
                         <Settings className="w-4 h-4" />
                         Admin Panel
                       </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin() && (
+                    <DropdownMenuItem onClick={toggleAdminView} className="flex items-center gap-2 cursor-pointer">
+                      {isAdminViewMode ? (
+                        <>
+                          <EyeOff className="w-4 h-4" />
+                          Switch to User View
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-4 h-4" />
+                          Switch to Admin View
+                        </>
+                      )}
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
