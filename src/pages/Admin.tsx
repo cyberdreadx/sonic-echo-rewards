@@ -27,25 +27,21 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error('No session');
-      }
-
-      const response = await fetch('/functions/v1/admin-get-users', {
+      const { data, error } = await supabase.functions.invoke('admin-get-users', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.session.access_token}`,
-          'Content-Type': 'application/json',
-        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
       }
 
-      const result = await response.json();
-      setUsers(result.users || []);
+      if (data?.users) {
+        setUsers(data.users);
+      } else {
+        console.error('No users data returned');
+        setUsers([]);
+      }
     } catch (error) {
       console.error('Error:', error);
       toast({
