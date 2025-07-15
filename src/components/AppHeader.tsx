@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3, LogOut, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ const AppHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const { toast } = useToast();
 
   const navigationItems = [
@@ -143,6 +145,14 @@ const AppHeader = () => {
                       Profile
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin() && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="w-4 h-4" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
                     <Settings className="w-4 h-4" />
                     Settings
