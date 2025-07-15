@@ -284,7 +284,8 @@ serve(async (req) => {
       statusCode: response.status.code,
       statusMessage: response.status.msg,
       hasMetadata: !!response.metadata,
-      hasMusic: !!response.metadata?.music?.[0]
+      hasMusic: !!response.metadata?.music?.[0],
+      fullResponse: JSON.stringify(response, null, 2)
     });
 
     if (response.status.code === 0) {
