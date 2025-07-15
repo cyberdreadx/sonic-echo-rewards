@@ -182,12 +182,15 @@ async function recognizeAudio(audioBlob: Blob): Promise<ACRCloudResponse> {
 }
 
 function formatMusicInfo(response: ACRCloudResponse) {
-  if (!response.metadata?.music?.[0]) {
+  // Check for both music database results and custom bucket results
+  const track = response.metadata?.music?.[0] || response.metadata?.custom_files?.[0];
+  
+  if (!track) {
     return null;
   }
 
-  const track = response.metadata.music[0];
-  const artists = track.artists.map(artist => artist.name).join(', ');
+  // Handle both formats - music database has artists array, custom files might have different structure
+  const artists = track.artists?.map(artist => artist.name).join(', ') || 'Unknown Artist';
   const external = track.external_metadata;
 
   return {
