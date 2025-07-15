@@ -133,13 +133,13 @@ const AppHeader = () => {
               >
                 {isAdminViewMode ? (
                   <>
-                    <EyeOff className="w-3 h-3" />
-                    User
+                    <Eye className="w-3 h-3" />
+                    Admin Mode
                   </>
                 ) : (
                   <>
-                    <Eye className="w-3 h-3" />
-                    Admin
+                    <EyeOff className="w-3 h-3" />
+                    User Mode
                   </>
                 )}
               </Button>
@@ -187,12 +187,12 @@ const AppHeader = () => {
                       {isAdminViewMode ? (
                         <>
                           <EyeOff className="w-4 h-4" />
-                          Switch to User View
+                          Switch to User Mode
                         </>
                       ) : (
                         <>
                           <Eye className="w-4 h-4" />
-                          Switch to Admin View
+                          Switch to Admin Mode
                         </>
                       )}
                     </DropdownMenuItem>
