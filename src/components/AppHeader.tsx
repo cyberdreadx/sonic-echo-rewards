@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3, LogOut, LogIn, Eye, EyeOff } from 'lucide-react';
+import { Coins, User, Menu, Bell, X, Home, Search, Trophy, Settings, BarChart3, LogOut, LogIn, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminView } from '@/contexts/AdminViewContext';
 import { useToast } from '@/hooks/use-toast';
 import TokenBalance from '@/components/TokenBalance';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ const AppHeader = () => {
   const { isAdmin } = useUserRole();
   const { isAdminViewMode, toggleAdminView, showAdminFeatures } = useAdminView();
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
 
   const navigationItems = [
     { name: 'Discover', path: '/', icon: Home },
@@ -58,7 +60,7 @@ const AppHeader = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 w-full">
+    <header className="bg-background border-b border-border sticky top-0 z-50 w-full">
       <div className="w-full px-3 py-2 max-w-md mx-auto md:max-w-7xl md:px-6 md:py-3">
         <div className="flex items-center justify-between w-full gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -66,7 +68,7 @@ const AppHeader = () => {
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden flex-shrink-0 h-8 w-8">
-                  <Menu className="w-4 h-4 text-black" />
+                  <Menu className="w-4 h-4 text-foreground" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-64">
@@ -81,8 +83,8 @@ const AppHeader = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         isActivePath(item.path)
-                          ? 'bg-gray-100 text-black'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-black'
+                          ? 'bg-accent text-accent-foreground'
+                          : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
@@ -94,7 +96,7 @@ const AppHeader = () => {
             </Sheet>
 
             <Link to="/" className="flex items-center min-w-0">
-              <h1 className="text-base md:text-2xl font-bold text-black truncate">
+              <h1 className="text-base md:text-2xl font-bold text-foreground truncate">
                 DISCONIUM
               </h1>
             </Link>
@@ -108,8 +110,8 @@ const AppHeader = () => {
                 to={item.path}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActivePath(item.path)
-                    ? 'bg-gray-100 text-black'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-black'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                 }`}
               >
                 <item.icon className="w-4 h-4" />
@@ -148,8 +150,23 @@ const AppHeader = () => {
 
             <TokenBalance compact={true} />
             
+            {/* Dark Mode Toggle */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme}
+              className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10"
+              aria-label="Toggle dark mode"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 md:w-5 md:h-5" />
+              ) : (
+                <Moon className="w-4 h-4 md:w-5 md:h-5" />
+              )}
+            </Button>
+            
             <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10">
-              <Bell className="w-4 h-4 md:w-5 md:h-5 text-black" />
+              <Bell className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
             </Button>
             
             {/* User Menu Dropdown or Login Button */}
@@ -157,10 +174,10 @@ const AppHeader = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10">
-                    <User className="w-4 h-4 md:w-5 md:h-5 text-black" />
+                    <User className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200">
+                <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                       <User className="w-4 h-4" />

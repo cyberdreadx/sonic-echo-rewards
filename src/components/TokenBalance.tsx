@@ -18,9 +18,9 @@ const TokenBalance = ({ className = '', showLabel = true, compact = false }: Tok
   }
 
   return (
-    <div className={`flex items-center gap-1 bg-gray-100 px-1.5 py-1 md:px-3 md:py-2 rounded border border-gray-200 ${className}`}>
+    <div className={`flex items-center gap-1 bg-muted px-1.5 py-1 md:px-3 md:py-2 rounded border border-border ${className}`}>
       <Coins className="w-3 h-3 md:w-4 md:h-4 text-amber-600 flex-shrink-0" />
-      <span className="text-black font-medium text-xs md:text-base whitespace-nowrap">
+      <span className="text-foreground font-medium text-xs md:text-base whitespace-nowrap">
         {loading ? (
           <span className="animate-pulse">...</span>
         ) : (
