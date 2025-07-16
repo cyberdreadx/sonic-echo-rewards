@@ -4,7 +4,12 @@ import { Home, User, BarChart3, Mic } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
-const BottomNavigation = () => {
+interface BottomNavigationProps {
+  onMicClick?: () => void;
+  isRecording?: boolean;
+}
+
+const BottomNavigation = ({ onMicClick, isRecording = false }: BottomNavigationProps) => {
   const location = useLocation();
   const { user } = useAuth();
 
@@ -37,7 +42,15 @@ const BottomNavigation = () => {
 
         {/* Center listening button */}
         <div className="flex-1 flex justify-center">
-          <button className="bg-foreground text-background hover:bg-foreground/90 p-4 rounded-full transition-all duration-300 active:scale-95 shadow-lg">
+          <button 
+            onClick={onMicClick}
+            className={cn(
+              "p-4 rounded-full transition-all duration-300 active:scale-95 shadow-lg",
+              isRecording 
+                ? "bg-red-500 text-white animate-pulse" 
+                : "bg-foreground text-background hover:bg-foreground/90"
+            )}
+          >
             <Mic className="w-6 h-6" />
           </button>
         </div>

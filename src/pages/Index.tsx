@@ -10,11 +10,40 @@ import BottomNavigation from '@/components/BottomNavigation';
 import MusicRecognition from '@/components/MusicRecognition';
 import AdSpace from '@/components/AdSpace';
 import ACRCloudDebugger from '@/components/ACRCloudDebugger';
+import { useAudioRecording } from '@/hooks/useAudioRecording';
+import { useToast } from '@/hooks/use-toast';
+import { useRef } from 'react';
 
 const Index = () => {
   const { user } = useAuth();
   const { showAdminFeatures } = useAdminView();
   const isMobile = useIsMobile();
+  const { isRecording, startRecording, stopRecording, clearRecording } = useAudioRecording();
+  const { toast } = useToast();
+  const musicRecognitionRef = useRef<{ handleStartListening: () => void; handleStopListening: () => void } | null>(null);
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      try {
+        clearRecording();
+        await startRecording();
+        
+        // Auto-stop after 10 seconds
+        setTimeout(() => {
+          stopRecording();
+        }, 10000);
+      } catch (error) {
+        console.error('Start recording error:', error);
+        toast({
+          title: "Recording Failed",
+          description: "Could not access microphone. Please check permissions.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -35,7 +64,7 @@ const Index = () => {
         <AdSpace />
       </main>
       
-      {isMobile && <BottomNavigation />}
+      {isMobile && <BottomNavigation onMicClick={handleMicClick} isRecording={isRecording} />}
     </div>
   );
 };
