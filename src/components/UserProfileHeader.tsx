@@ -141,15 +141,15 @@ const UserProfileHeader = () => {
 
   if (loading) {
     return (
-      <Card className="bg-white border border-gray-200">
+      <Card className="bg-card border border-border">
         <CardContent className="p-6">
           <div className="animate-pulse">
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-200 rounded-full"></div>
-              <div className="flex-1 space-y-3">
-                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-muted rounded-full"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-6 bg-muted rounded w-1/3"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  <div className="h-4 bg-muted rounded w-1/4"></div>
               </div>
             </div>
           </div>
@@ -160,25 +160,25 @@ const UserProfileHeader = () => {
 
   if (!user) {
     return (
-      <Card className="bg-white border border-gray-200">
+      <Card className="bg-card border border-border">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <Avatar className="w-20 h-20 md:w-24 md:h-24">
-              <AvatarFallback className="text-xl font-bold bg-gray-100 text-gray-400">?</AvatarFallback>
+              <AvatarFallback className="text-xl font-bold bg-muted text-muted-foreground">?</AvatarFallback>
             </Avatar>
             
             <div className="flex-1 space-y-3">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-400">No Profile Yet</h1>
-                <p className="text-gray-400">Sign in to create your profile</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-muted-foreground">No Profile Yet</h1>
+                <p className="text-muted-foreground">Sign in to create your profile</p>
               </div>
               
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-gray-400 border-gray-300">
+                <Badge variant="outline" className="text-muted-foreground border-border">
                   <Trophy className="w-3 h-3 mr-1" />
                   No Rank Yet
                 </Badge>
-                <Badge variant="outline" className="text-gray-400 border-gray-300">New User</Badge>
+                <Badge variant="outline" className="text-muted-foreground border-border">New User</Badge>
               </div>
             </div>
           </div>
@@ -188,7 +188,7 @@ const UserProfileHeader = () => {
   }
 
   return (
-    <Card className="bg-white border border-gray-200">
+    <Card className="bg-card border border-border">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row md:items-start gap-4">
           <div className="flex flex-col items-center md:items-start">
@@ -229,11 +229,11 @@ const UserProfileHeader = () => {
                   </div>
                 ) : (
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-black">
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                       {profile?.username || user.email?.split('@')[0] || 'User'}
                     </h1>
                     {profile?.bio && (
-                      <p className="text-gray-600 mt-1">{profile.bio}</p>
+                      <p className="text-muted-foreground mt-1">{profile.bio}</p>
                     )}
                   </div>
                 )}
@@ -269,7 +269,7 @@ const UserProfileHeader = () => {
               <Badge variant="outline">Discovery Streak: 7</Badge>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row gap-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 Joined {new Date(profile?.created_at || '').toLocaleDateString()}

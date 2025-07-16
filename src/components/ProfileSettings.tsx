@@ -212,9 +212,9 @@ const ProfileSettings = () => {
   return (
     <div className="space-y-6">
       {/* Wallet Info */}
-      <Card className="bg-white border border-gray-200">
+      <Card className="bg-card border border-border">
         <CardHeader className="pb-3">
-          <CardTitle className="text-black flex items-center gap-2 text-lg">
+          <CardTitle className="text-foreground flex items-center gap-2 text-lg">
             <Wallet className="w-5 h-5" />
             Phantom Wallet
           </CardTitle>
@@ -370,7 +370,7 @@ const ProfileSettings = () => {
       </Card>
 
       {/* Settings */}
-      <Card className="bg-white border border-gray-200">
+      <Card className="bg-card border border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-black flex items-center gap-2 text-lg">
             <Settings className="w-5 h-5" />

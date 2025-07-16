@@ -63,7 +63,7 @@ const ACRCloudSettings: React.FC<ACRCloudSettingsProps> = ({ onCredentialsChange
   const hasCredentials = credentials.accessKey && credentials.accessSecret;
 
   return (
-    <Card className="bg-white border border-gray-200 mb-6">
+    <Card className="bg-card border border-border mb-6">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-black flex items-center gap-2 text-lg">

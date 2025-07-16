@@ -7,9 +7,9 @@ const RecentActivity = () => {
   const activities: any[] = [];
 
   return (
-    <Card className="bg-white border border-gray-200">
+    <Card className="bg-card border border-border">
       <CardHeader>
-        <CardTitle className="text-black flex items-center gap-2 text-lg md:text-xl">
+        <CardTitle className="text-foreground flex items-center gap-2 text-lg md:text-xl">
           <Clock className="w-5 h-5" />
           Recent Activity
         </CardTitle>

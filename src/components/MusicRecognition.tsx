@@ -162,7 +162,7 @@ const MusicRecognition = () => {
     <div className="space-y-6">
       {showAdminFeatures && <AdminSettings />}
       
-      <Card className="bg-white border border-gray-200">
+      <Card className="bg-card border border-border">
         <CardContent className="p-6 md:p-8 text-center">
           <div className="mb-6 md:mb-8">
             <div className={`w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full flex items-center justify-center mb-4 md:mb-6 transition-all duration-300 border-2 active:scale-95 ${
@@ -177,15 +177,15 @@ const MusicRecognition = () => {
               ) : isRecording ? (
                 <Mic className="w-12 h-12 md:w-16 md:h-16 text-white" />
               ) : (
-                <Music className="w-12 h-12 md:w-16 md:h-16 text-black" />
+                <Music className="w-12 h-12 md:w-16 md:h-16 text-foreground" />
               )}
             </div>
             
-            <h2 className="text-2xl md:text-3xl font-bold text-black mb-3 md:mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 md:mb-4">
               {isProcessing ? 'Identifying Track...' : isRecording ? 'Listening...' : 'Ready to Discover'}
             </h2>
             
-            <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 px-4 md:px-0">
+            <p className="text-muted-foreground text-base md:text-lg mb-6 md:mb-8 px-4 md:px-0">
               {isProcessing 
                 ? 'Processing audio securely...' 
                 : isRecording 
@@ -217,28 +217,28 @@ const MusicRecognition = () => {
               </Button>
             ) : null}
             
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               Earn 0.5-2.0 $DISCO per successful identification
             </div>
           </div>
 
           {result && (
             <div className="mt-8 p-6 bg-gray-50 rounded-xl text-left">
-              <h3 className="text-xl font-bold text-black mb-2">{result.title}</h3>
-              <p className="text-gray-700 mb-2">by {result.artists}</p>
+              <h3 className="text-xl font-bold text-foreground mb-2">{result.title}</h3>
+              <p className="text-muted-foreground mb-2">by {result.artists}</p>
               {result.album && (
-                <p className="text-gray-600 text-sm mb-4">Album: {result.album}</p>
+                <p className="text-muted-foreground text-sm mb-4">Album: {result.album}</p>
               )}
               
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-600">Confidence:</span>
+                <span className="text-sm text-muted-foreground">Confidence:</span>
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
                   {result.score}% match
                 </Badge>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-semibold text-black">Available on:</h4>
+                <h4 className="font-semibold text-foreground">Available on:</h4>
                 <div className="flex flex-wrap gap-2">
                   {result.availableOn.spotify && (
                     <Button
@@ -281,7 +281,7 @@ const MusicRecognition = () => {
                 </div>
                 
                 {!result.availableOn.spotify && !result.availableOn.appleMusic && !result.availableOn.youtube && (
-                  <p className="text-gray-500 text-sm">No streaming links available</p>
+                  <p className="text-muted-foreground text-sm">No streaming links available</p>
                 )}
               </div>
             </div>

@@ -30,7 +30,7 @@ const UserStats = () => {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4 w-full">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-white border border-gray-200 min-w-0">
+        <Card key={index} className="bg-card border border-border min-w-0">
           <CardHeader className="pb-2 md:pb-3 px-3 md:px-6">
             <CardTitle className="text-xs md:text-sm text-gray-600 font-medium flex flex-col items-center gap-2 md:flex-row min-w-0">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">

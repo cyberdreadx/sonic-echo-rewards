@@ -14,14 +14,14 @@ const Index = () => {
   const { showAdminFeatures } = useAdminView();
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <AppHeader />
       
       <main className="w-full px-4 py-6 space-y-6 max-w-md mx-auto md:max-w-4xl md:px-6">
         {!user && (
           <div className="text-center py-8 space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900">Welcome to Disconium</h2>
-            <p className="text-gray-600">Discover music and earn rewards</p>
+            <h2 className="text-2xl font-bold text-foreground">Welcome to Disconium</h2>
+            <p className="text-muted-foreground">Discover music and earn rewards</p>
             <Button asChild>
               <Link to="/auth">Get Started</Link>
             </Button>

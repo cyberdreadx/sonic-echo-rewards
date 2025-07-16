@@ -8,7 +8,7 @@ import ProfileSettings from '@/components/ProfileSettings';
 
 const Profile = () => {
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <AppHeader />
       
       <main className="w-full px-4 py-6 space-y-6 max-w-md mx-auto md:max-w-7xl md:px-6">

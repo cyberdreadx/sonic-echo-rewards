@@ -43,29 +43,29 @@ const ProfileStats = () => {
   ];
 
   return (
-    <Card className="bg-white border border-gray-200">
+    <Card className="bg-card border border-border">
       <CardHeader>
-        <CardTitle className="text-black text-lg md:text-xl">Statistics</CardTitle>
+        <CardTitle className="text-foreground text-lg md:text-xl">Statistics</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {stats.map((stat, index) => (
-            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div key={index} className="p-4 bg-muted/50 rounded-lg border border-border">
               <div className="flex items-center justify-between mb-2">
-                <div className="w-8 h-8 rounded bg-white flex items-center justify-center">
-                  <stat.icon className="w-4 h-4 text-black" />
+                <div className="w-8 h-8 rounded bg-background flex items-center justify-center border border-border">
+                  <stat.icon className="w-4 h-4 text-foreground" />
                 </div>
                 <span className={`text-xs px-2 py-1 rounded ${
                   stat.trend === 'up' 
                     ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {stat.change}
                 </span>
               </div>
               <div>
-                <h3 className="text-sm text-gray-600 mb-1">{stat.title}</h3>
-                <p className="text-xl font-bold text-black">{stat.value}</p>
+                <h3 className="text-sm text-muted-foreground mb-1">{stat.title}</h3>
+                <p className="text-xl font-bold text-foreground">{stat.value}</p>
               </div>
             </div>
           ))}

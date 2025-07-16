@@ -65,9 +65,9 @@ const AdminSettings: React.FC = () => {
   };
 
   return (
-    <Card className="bg-white border border-gray-200 mb-6">
+    <Card className="bg-card border border-border mb-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-black flex items-center gap-2 text-lg">
+        <CardTitle className="text-foreground flex items-center gap-2 text-lg">
           <Settings className="w-5 h-5" />
           Admin Settings
         </CardTitle>
@@ -76,8 +76,8 @@ const AdminSettings: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-black">ACRCloud API Status</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-medium text-foreground">ACRCloud API Status</h3>
+            <p className="text-sm text-muted-foreground">
               Music recognition service configuration
             </p>
           </div>

@@ -7,9 +7,9 @@ const RecentDiscoveries = () => {
   const discoveries: any[] = [];
 
   return (
-    <Card className="bg-white border border-gray-200 w-full">
+    <Card className="bg-card border border-border w-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-black flex items-center gap-2 text-lg md:text-xl">
+        <CardTitle className="text-foreground flex items-center gap-2 text-lg md:text-xl">
           <Music className="w-5 h-5 text-black" />
           Recent Discoveries
         </CardTitle>
