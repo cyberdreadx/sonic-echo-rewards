@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminView } from '@/contexts/AdminViewContext';
 import { useToast } from '@/hooks/use-toast';
+import TokenBalance from '@/components/TokenBalance';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -145,15 +146,7 @@ const AppHeader = () => {
               </Button>
             )}
 
-            {/* Mobile: Compact token display */}
-            <div className="flex items-center gap-1 bg-gray-100 px-1.5 py-1 md:px-3 md:py-2 rounded border border-gray-200">
-              <Coins className="w-3 h-3 md:w-4 md:h-4 text-black flex-shrink-0" />
-              <span className="text-black font-medium text-xs md:text-base whitespace-nowrap">
-                <span className="hidden sm:inline">1,247 </span>
-                <span className="sm:hidden">1.2k</span>
-                <span className="hidden md:inline"> $DISCO</span>
-              </span>
-            </div>
+            <TokenBalance compact={true} />
             
             <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10">
               <Bell className="w-4 h-4 md:w-5 md:h-5 text-black" />
