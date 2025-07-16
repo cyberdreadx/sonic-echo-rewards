@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      token_transactions: {
+        Row: {
+          admin_user_id: string | null
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          transaction_type: Database["public"]["Enums"]["token_transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          admin_user_id?: string | null
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type: Database["public"]["Enums"]["token_transaction_type"]
+          user_id: string
+        }
+        Update: {
+          admin_user_id?: string | null
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: Database["public"]["Enums"]["token_transaction_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -71,6 +107,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_tokens: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          total_earned: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -80,6 +146,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_token_balance: {
+        Args: { _user_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -87,9 +157,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      process_token_transaction: {
+        Args: {
+          _user_id: string
+          _transaction_type: Database["public"]["Enums"]["token_transaction_type"]
+          _amount: number
+          _description?: string
+          _metadata?: Json
+          _admin_user_id?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      token_transaction_type:
+        | "earned_discovery"
+        | "earned_referral"
+        | "spent_premium"
+        | "admin_grant"
+        | "admin_deduct"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -218,6 +305,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      token_transaction_type: [
+        "earned_discovery",
+        "earned_referral",
+        "spent_premium",
+        "admin_grant",
+        "admin_deduct",
+      ],
     },
   },
 } as const
