@@ -169,15 +169,15 @@ const MusicRecognition = () => {
               isRecording 
                 ? 'bg-red-500 border-red-500 animate-pulse' 
                 : isProcessing
-                ? 'bg-gray-800 border-gray-800'
-                : 'bg-gray-100 border-gray-200 hover:bg-gray-200'
+                ? 'bg-primary border-primary'
+                : 'bg-muted border-border hover:bg-muted/80 hover:border-primary/20'
             }`}>
               {isProcessing ? (
-                <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-white animate-spin" />
+                <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-primary-foreground animate-spin" />
               ) : isRecording ? (
                 <Mic className="w-12 h-12 md:w-16 md:h-16 text-white" />
               ) : (
-                <Music className="w-12 h-12 md:w-16 md:h-16 text-foreground" />
+                <Music className="w-12 h-12 md:w-16 md:h-16 text-primary" />
               )}
             </div>
             
