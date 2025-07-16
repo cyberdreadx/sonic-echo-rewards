@@ -27,7 +27,11 @@ interface RecognitionResult {
   };
 }
 
-const MusicRecognition = () => {
+interface MusicRecognitionProps {
+  onHandlersReady?: (handlers: { handleStartListening: () => void; handleStopListening: () => void }) => void;
+}
+
+const MusicRecognition = ({ onHandlersReady }: MusicRecognitionProps) => {
   const { showAdminFeatures } = useAdminView();
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<RecognitionResult | null>(null);
@@ -91,6 +95,13 @@ const MusicRecognition = () => {
       }
     };
   }, []);
+
+  // Expose handlers to parent component
+  useEffect(() => {
+    if (onHandlersReady) {
+      onHandlersReady({ handleStartListening, handleStopListening });
+    }
+  }, [onHandlersReady]);
 
   const processAudio = async () => {
     if (!audioBlob) return;

@@ -11,37 +11,26 @@ import MusicRecognition from '@/components/MusicRecognition';
 import AdSpace from '@/components/AdSpace';
 import ACRCloudDebugger from '@/components/ACRCloudDebugger';
 import { useAudioRecording } from '@/hooks/useAudioRecording';
-import { useToast } from '@/hooks/use-toast';
-import { useRef } from 'react';
+import { useState, useCallback } from 'react';
 
 const Index = () => {
   const { user } = useAuth();
   const { showAdminFeatures } = useAdminView();
   const isMobile = useIsMobile();
-  const { isRecording, startRecording, stopRecording, clearRecording } = useAudioRecording();
-  const { toast } = useToast();
-  const musicRecognitionRef = useRef<{ handleStartListening: () => void; handleStopListening: () => void } | null>(null);
+  const { isRecording } = useAudioRecording();
+  const [musicHandlers, setMusicHandlers] = useState<{ handleStartListening: () => void; handleStopListening: () => void } | null>(null);
 
-  const handleMicClick = async () => {
+  const onHandlersReady = useCallback((handlers: { handleStartListening: () => void; handleStopListening: () => void }) => {
+    setMusicHandlers(handlers);
+  }, []);
+
+  const handleMicClick = () => {
+    if (!musicHandlers) return;
+    
     if (isRecording) {
-      stopRecording();
+      musicHandlers.handleStopListening();
     } else {
-      try {
-        clearRecording();
-        await startRecording();
-        
-        // Auto-stop after 10 seconds
-        setTimeout(() => {
-          stopRecording();
-        }, 10000);
-      } catch (error) {
-        console.error('Start recording error:', error);
-        toast({
-          title: "Recording Failed",
-          description: "Could not access microphone. Please check permissions.",
-          variant: "destructive",
-        });
-      }
+      musicHandlers.handleStartListening();
     }
   };
 
@@ -60,7 +49,7 @@ const Index = () => {
           </div>
         )}
         {showAdminFeatures && <ACRCloudDebugger />}
-        <MusicRecognition />
+        <MusicRecognition onHandlersReady={onHandlersReady} />
         <AdSpace />
       </main>
       
