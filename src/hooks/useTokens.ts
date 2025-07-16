@@ -47,17 +47,16 @@ export const useTokens = () => {
         .from('user_tokens')
         .select('balance')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          setBalance(0);
-        } else {
-          console.error('Error fetching token balance:', error);
-          setBalance(0);
-        }
-      } else {
+        console.error('Error fetching token balance:', error);
+        setBalance(0);
+      } else if (data) {
         setBalance(typeof data.balance === 'string' ? parseFloat(data.balance) : data.balance);
+      } else {
+        // No token record exists yet, set balance to 0
+        setBalance(0);
       }
     } catch (err) {
       console.error('Error:', err);
