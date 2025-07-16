@@ -200,7 +200,7 @@ const MusicRecognition = () => {
               <Button 
                 onClick={handleStartListening}
                 size="lg" 
-                className="bg-black hover:bg-gray-800 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-medium rounded-xl w-full md:w-auto active:scale-95 transition-transform"
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-400 hover:from-purple-600 hover:via-pink-600 hover:to-cyan-500 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-bold rounded-xl w-full md:w-auto active:scale-95 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-purple-500/25 border border-white/20"
               >
                 <Mic className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
                 Start Listening
